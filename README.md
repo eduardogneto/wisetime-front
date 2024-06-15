@@ -1,5 +1,10 @@
 **Cidade Alta Front End**
 
+-- IMAGENS DO PROJETO
+![login](https://github.com/Uude1/cidade-alta-front/assets/89144716/599bab72-1518-4eba-ac86-d648d03d0082)
+![dashboard](https://github.com/Uude1/cidade-alta-front/assets/89144716/62c2d474-effc-4ebe-b88c-eb4c1228d3e0)
+![config](https://github.com/Uude1/cidade-alta-front/assets/89144716/9fa970a2-0de0-43a7-8258-cf933bba78b4)
+
 Sistema desenvolvido para:
 
 - Login:
@@ -75,4 +80,5 @@ INSERT INTO emblems (id, slug, name, image, category) VALUES
 
 INSERT INTO users (id, name, email, password) VALUES
 (1, 'Admin', 'admin@cda.com.br', 'admin');
+
 
