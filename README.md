@@ -1,70 +1,78 @@
-# Getting Started with Create React App
+**Cidade Alta Front End**
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Sistema desenvolvido para:
 
-## Available Scripts
+- Login:
+  - Realização de Login para o usuário de forma simples.
+  - Utiliza-se Token para manter usuario logado com segurança.
+    
+- Tela de dashboard:
+  - Visualização do usuário para todos os emblemas já resgatados (separados por cores de categoria).
+  - Botão para o usuário resgatar novos emblemas.
+  - Filtro por categoria, caso o usuário queira visualizar somente emblemas de tal categoria resgatados.
+  - Filtro de pesquisa, filtrando pelo nome do emblema.
+  - Exportação via Excel, podendo exportar os emblemas já resgatados, se caso utilizar algum dos filtros e exportar, ele respeita os filtros utilizados.
+    
+- Tela de configuração de usuário:
+  - Liberado para a troca de nome, email ou senha do próprio usuário.
+    
+---
 
-In the project directory, you can run:
+## Bando de dados
 
-### `npm start`
+-- Criação da database
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+CREATE DATABASE cda_teste;
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+-- Uso da database
 
-### `npm test`
+USE cda_teste;
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+-- Tabela emblems
 
-### `npm run build`
+CREATE TABLE emblems (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    category VARCHAR(50) NOT NULL
+);
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+-- Tabela users
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+-- Tabela emblemsuser
 
-### `npm run eject`
+CREATE TABLE emblemsuser (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    emblem_id BIGINT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (emblem_id) REFERENCES emblems(id)
+);
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+-- INSERTS
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+-- Inserção de dados na tabela emblems
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+INSERT INTO emblems (id, slug, name, image, category) VALUES
+(1, 'cda', 'Cidade Alta', 'https://cidadealtarp.com/imagens/challenge/cidade-alta.png', 'gold'),
+(2, 'cda-valley', 'Cidade Alta Valley', 'https://cidadealtarp.com/imagens/challenge/cidade-alta-valley.png', 'gold'),
+(3, 'policia', 'Policia do Cidade Alta', 'https://cidadealtarp.com/imagens/challenge/policia.png', 'silver'),
+(4, 'hospital', 'Hospital do Cidade Alta', 'https://cidadealtarp.com/imagens/challenge/hospital.png', 'silver'),
+(5, 'mecanica', 'Mecânica do Cidade Alta', 'https://cidadealtarp.com/imagens/challenge/mecanica.png', 'silver'),
+(6, 'taxi', 'Taxi do Cidade Alta', 'https://cidadealtarp.com/imagens/challenge/taxi.png', 'silver'),
+(7, 'curuja', 'Coruja', 'https://cidadealtarp.com/imagens/challenge/coruja.png', 'bronze'),
+(8, 'hiena', 'Hiena', 'https://cidadealtarp.com/imagens/challenge/hiena.png', 'bronze'),
+(9, 'gato', 'Gato', 'https://cidadealtarp.com/imagens/challenge/gato.png', 'bronze'),
+(10, 'urso', 'Urso', 'https://cidadealtarp.com/imagens/challenge/urso.png', 'bronze');
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+INSERT INTO users (id, name, email, password) VALUES
+(1, 'Admin', 'admin@cda.com.br', 'admin');
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
