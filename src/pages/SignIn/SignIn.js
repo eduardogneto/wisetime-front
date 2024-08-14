@@ -1,12 +1,9 @@
-import { Divider, message } from 'antd';
 import React, { useState } from 'react';
-import logo from "../../assets/logo.png";
-import "./signin.css";
-
-import api from "../../connection/api";
+import './signin.css'; // Arquivo de estilo
+import logo from "../../assets/image1.png"; // Imagem importada
+import { message } from 'antd'; // Biblioteca de mensagens (se necessário)
 
 export default function SignIn() {
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loadingAuth, setLoadingAuth] = useState(false);
@@ -24,36 +21,38 @@ export default function SignIn() {
         if (email !== '' && password !== '') {
             logIn(email, password);
         } else {
-            return message.error('Valores vazios')
+            message.error('Valores vazios');
         }
-    }
-
+    };
 
     async function logIn(email, password) {
         setLoadingAuth(true);
 
-        try {
-            const response = await api.post('/login', { email, password });
-            const data = response.data[0];
-            const idUser = data.id;
-            const nameUser = data.name;
-            const emailUser = data.email;
-            localStorage.setItem('token', idUser);
-            localStorage.setItem('id', idUser);
-            localStorage.setItem('name', nameUser);
-            localStorage.setItem('email', emailUser);
-            message.success(`Bem vindo de volta ${data.name}!`);
+        const simulatedUser = {
+            id: '12345',
+            name: 'Usuário Exemplo',
+            email: email,
+        };
 
-            setTimeout(() => {
-                window.location.reload();
+        setTimeout(() => {
+            try {
+                const data = simulatedUser;
+                localStorage.setItem('token', data.id);
+                localStorage.setItem('id', data.id);
+                localStorage.setItem('name', data.name);
+                localStorage.setItem('email', data.email);
+                message.success(`Bem-vindo de volta ${data.name}!`);
+
+                setTimeout(() => {
+                    window.location.reload();
+                    setLoadingAuth(false);
+                }, 2000);
+            } catch (err) {
+                console.log(err);
+                message.error('Ops, algo deu errado!');
                 setLoadingAuth(false);
-            }, 2000);
-
-        } catch (err) {
-            console.log(err);
-            message.error('Ops algo deu errado!');
-            setLoadingAuth(false);
-        }
+            }
+        }, 1000);
     }
 
     const sendEnter = (e) => {
@@ -63,35 +62,55 @@ export default function SignIn() {
                 logIn(email, password);
             }
         } else {
-            return message.error('Valores vazios')
+            message.error('Valores vazios');
         }
-    }
+    };
 
     return (
-        <div className="container">
-            <div className="container-left">
-                <img src={logo} width='250' height='250' alt="logo" />
-            </div>
-            <div className="container-right">
-                <div className='enter-login'>
-                    <h1 className='title-default-login'>Entrar</h1>
-                    <Divider style={{ backgroundColor: "rgb(255, 192, 70)", width: "156px" }} />
+        <div className="login">
+            <div className="container-login">
+                <div className="left-side">
+                    <p className='low'>Encontre tudo</p>
+                    <p className='low'>que precisa em</p>
+                    <p className='high'>um só lugar!</p>
+                    <img src={logo} alt="Imagem de fundo" className="bottom-image" />
                 </div>
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type='email'
-                        placeholder='Digite seu email'
-                        value={email}
-                        onChange={handleEmailChange}
-                    />
-                    <input
-                        type='password'
-                        placeholder='*********'
-                        value={password}
-                        onChange={handlePasswordChange}
-                    />
-                    <button type='submit' onClick={handleSubmit} onKeyDown={sendEnter}>{loadingAuth ? 'Carregando...' : 'Acessar'}</button>
-                </form>
+
+                <div className="right-side">
+                    <div className="login-box">
+                        <div className='wisetime'>
+                            <h1 style={{color:"#FF426B"}}>WiseTime</h1>
+                        </div>
+                        <div className='form-wise'>
+                            <form onSubmit={handleSubmit}>
+                                <div className='email-form'>
+                                    <p>Email</p>
+                                    <input 
+                                        type="email" 
+                                        placeholder="Digite seu email" 
+                                        value={email}
+                                        onChange={handleEmailChange} 
+                                        required 
+                                    />
+                                </div>
+                                <div className='pass-form'>
+                                    <p>Senha</p>
+                                    <input 
+                                        type="password" 
+                                        placeholder="*********" 
+                                        value={password}
+                                        onChange={handlePasswordChange} 
+                                        required 
+                                    />
+                                </div>
+                            </form>
+                        <div className='button-form'>
+                        <button type='submit' onClick={handleSubmit} onKeyDown={sendEnter}>{loadingAuth ? 'Carregando...' : 'Entrar'}</button>
+
+                        </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

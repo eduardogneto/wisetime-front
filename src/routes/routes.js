@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import ConfigurationUser from '../pages/ConfigurationUser/ConfigurationUser.tsx';
 import Dashboard from '../pages/Dashboard/Dashboard.tsx';
 import SignIn from '../pages/SignIn/SignIn.js';
+import User from '../pages/User/User.tsx';
+import HistoryPoint from '../pages/HistoryPoint/HistoryPoint.tsx';
 
 const ApplicationRoutes = () => {
     const [signed, setSigned] = useState(false);
@@ -15,22 +16,24 @@ const ApplicationRoutes = () => {
     }, []);
 
     const PrivateRoute = ({ children }) => {
-        return signed ? children : <Navigate to='/' />;
+        return signed ? children : <Navigate to='/login' />;
     };
 
     const PublicRoute = ({ children }) => {
         return signed ? <Navigate to='/dashboard' /> : children;
     };
 
-    return (
+    return (<>
         <BrowserRouter>
             <Routes>
                 <Route path='/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-                <Route path='/config' element={<PrivateRoute><ConfigurationUser /></PrivateRoute>} />
-                <Route path='/' element={<PublicRoute><SignIn /></PublicRoute>} />
-                <Route path='*' element={<h1>ERROR 404 - PAGE NOT FOUND</h1>} />
+                <Route path='/historypoint' element={<PrivateRoute><HistoryPoint /></PrivateRoute>} />
+                <Route path='/management/users' element={<PrivateRoute><User /></PrivateRoute>} />
+                <Route path='/login' element={<PublicRoute><SignIn /></PublicRoute>} />
+                <Route path='*' element={'ERRO 404 - REQUEST NAO RECONHECIDA'} />
             </Routes>
         </BrowserRouter>
+    </>
     );
 };
 

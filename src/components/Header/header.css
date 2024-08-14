@@ -1,98 +1,68 @@
-.sideBar {
+.topBar {
+    display: flex;
+    justify-content: space-between; /* Espaça os elementos nas extremidades */
+    align-items: center; /* Centraliza verticalmente os elementos */
     margin: 0;
-    padding: 0;
+    padding: 0 20px; /* Adiciona um pouco de espaço nas laterais */
     top: 0;
     left: 0;
-    width: 15%;
+    width: 100%;
     z-index: 999;
     background-color: rgb(17, 19, 29);
     position: fixed;
-    height: 100%;
-    overflow: auto;
+    height: 60px; /* Definindo uma altura fixa */
+    box-sizing: border-box; /* Inclui padding e border no cálculo de altura */
 }
 
-.sideBar div {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    height: 150px;
-}
-
-.sideBar div {
-    padding-top: 30px;
-}
-
-.sideBar div img {
-    border-radius: 50%;
-    display: block;
-    margin: auto;
-    -webkit-filter: drop-shadow(2px 3px 6px #121212);
-    filter: drop-shadow(2px 3px 6px #121212);
-    object-fit: cover;
-}
-
-.sideBar a {
-    color: rgba(255, 255, 255, 0.884);
-    padding: 16px;
-    text-decoration: none;
+.leftbar, .rightbar {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    transition: ease-in-out .4s;
+    align-items: center; /* Centraliza verticalmente os elementos dentro das barras */
 }
 
-.sideBar a svg {
-    margin-right: .5em;
+.leftbar h1, .rightbar p {
+    margin: 0;
+    padding-left: 10px; /* Espaço entre o ícone e o texto */
+    color: white; /* Certifica-se de que o texto seja branco para melhor visibilidade */
 }
 
-.sideBar a:hover {
-    background-color: rgb(32 35 49);
-    color: #FFF;
+.leftbar h1 {
+    font-size: 20px; /* Tamanho da fonte igual ao tamanho do ícone */
+    margin-left: 10px; /* Espaço entre o ícone e o texto */
+    color: white; /* Cor do texto */
+    display: inline; /* Para garantir que o texto fique ao lado do ícone */
 }
 
-@media screen and (max-width: 700px) {
-    .sideBar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        display: flex;
-        justify-content: space-around;
-    }
-
-    div .content {
-        margin-left: 0;
-    }
-
-    .sideBar a {
-        float: left;
-    }
-
-    .sideBar div {
-        display: none;
-    }
-
-    .sideBar a svg {
-        display: none;
-    }
+.pink {
+    color: #FF3366; /* Cor rosa */
 }
 
-@media screen and (max-width: 400px) {
-    .sideBar a {
-        text-align: center;
-    }
-
-    .sideBar a svg {
-        display: none;
-    }
-}
-
-.logout-button-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
+.sidebar {
     position: absolute;
-    bottom: 0;
-    width: 100%;
-  }
-  
+    top: calc(100% - 95%);
+    left: 0;
+    width: calc(100% - 85%);
+    padding-top: 10px;
+    height: 100%;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ant-menu-item li:hover {
+    background-color: #FF0044;
+}
+
+.ant-menu-item-selected{
+    background-color: #FF3366 !important;
+}
+
+.ant-menu-dark{
+    background-color: rgb(17, 19, 29);
+}
+
+.ant-menu{
+    height: 100%;
+}

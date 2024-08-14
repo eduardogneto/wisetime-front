@@ -1,33 +1,130 @@
 import './header.css';
-import { Button } from 'antd';
-import { useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { FiHome, FiSettings, FiUsers } from "react-icons/fi"; // para icones svg
-import { GiMoneyStack } from "react-icons/gi";
-import logo from "../../assets/logo.png";
+import React, { useState, useEffect } from 'react';
+import {
+  ContainerOutlined,
+  DesktopOutlined,
+  ImportOutlined,
+  MenuOutlined,
+  PieChartOutlined,
+} from '@ant-design/icons';
+import { Menu, Avatar } from 'antd';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-function handleExit() {
+const items = [
+  {
+    key: '1',
+    icon: <PieChartOutlined />,
+    label: 'Bater Ponto',
+    path: '/dashboard'
+  },
+  {
+    key: '2',
+    icon: <ContainerOutlined />,
+    label: 'Histórico de Ponto',
+    path: '/historypoint'
+  },
+  {
+    key: 'sub1',
+    label: 'Painel de Gestor',
+    icon: <DesktopOutlined />,
+    children: [
+      {
+        key: '3',
+        label: 'Usuários',
+        path: '/management/users'
+      },
+      {
+        key: '4',
+        label: 'Vencimento de Banco',
+        path: '/management/bank-expiration'
+      },
+      {
+        key: '5',
+        label: 'Solicitações',
+        path: '/management/requests'
+      },
+      {
+        key: '6',
+        label: 'Relatórios',
+        path: '/management/reports'
+      },
+      {
+        key: '7',
+        label: 'Cargos e Organizações',
+        path: '/management/positions'
+      },
+    ],
+  },
+  {
+    key: '8',
+    icon: <ImportOutlined />,
+    label: 'Sair',
+  },
+];
+
+export default function Header() {
+  const [collapsed, setCollapsed] = useState(true); 
+  const [selectedKeys, setSelectedKeys] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    const key = items.find(item => item.path === path)?.key ||
+                items.flatMap(item => item.children || []).find(child => child.path === path)?.key || 
+                '1'; 
+    setSelectedKeys([key]);
+  }, [location.pathname]);
+
+  const toggleCollapsed = () => {
+    setCollapsed(!collapsed);
+  };
+
+  const handleMenuClick = (e) => {
+    const actions = {
+      '1': () => navigate('/dashboard'),
+      '2': () => navigate('/historypoint'),
+      '3': () => navigate('/management/users'),
+      '8': handleExit,
+    };
+
+    if (actions[e.key]) {
+      actions[e.key]();
+    }
+  };
+
+  const handleExit = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('id');
     localStorage.removeItem('name');
     localStorage.removeItem('email');
-    window.location.reload();
-  }
+    window.location.href = '/login';
+  };
 
-export default function Header() {
   return (
-    <div className='sideBar'>
-      <div>
-        <img src={logo} alt='Logo' width='110' height='110' />
+    <div className='header'>
+      <div className='topBar'>
+        <div className='leftbar'>
+          <MenuOutlined
+            onClick={toggleCollapsed}
+            style={{ color: 'white', fontSize: 20, cursor: 'pointer' }}
+          />
+          <h1><span className='pink'>W</span>iseTime</h1>
+        </div>
+        <div className='rightbar'>
+          <p>Eduardo</p>
+          <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginLeft: 15}}>EN</Avatar>
+        </div>
       </div>
-
-      <Link to='/dashboard'><FiHome color='#FFF' size={24} /> Dashboard</Link>
-      <Link to='/config'><FiSettings color='#FFF' size={24} /> Configurações</Link>
-
-      <div className='logout-button-container'>
-        <Button onClick={handleExit} className='exit-button ant-btn-lg' type="text" size='large' style={{ backgroundColor: "rgb(255, 192, 70)", color: 'white' }}>
-          Sair da conta
-        </Button>
+      <div className='sidebar'>
+        <Menu
+          selectedKeys={selectedKeys}
+          mode="inline"
+          theme="dark"
+          inlineCollapsed={collapsed}
+          items={items}
+          onClick={handleMenuClick}
+        />
       </div>
     </div>
   );

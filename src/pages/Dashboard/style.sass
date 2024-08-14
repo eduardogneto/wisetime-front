@@ -1,84 +1,134 @@
-.top-filter
-  background: rgba(217, 217, 217, 0.15)
-  width: 95%
-  border: 1px solid #C6C6C6
-  border-radius: 13px
+@import url('https://fonts.googleapis.com/css2?family=Krona+One&display=swap')
+  
+.container-point
+  width: 1300px
+  height: 480px
+  background-color: #0C1317
+  border-radius: 15px
   display: flex
-  flex-direction: row
-  align-items: center
-  padding: 7px
-  justify-content: space-between
+  flex-direction: column
+  margin-bottom: 50px 
+  margin-top: 70px
+  
+p
+  font-family: 'Krona One', sans-serif
 
-  .date-range-picker
-    margin-left: 20px
 
-  button
-    margin-top: 0
-    border-top: 0
+.container-infos
+  width: 1300px
+  height: 170px
+  background-color: #0C1317
+  border-radius: 15px
+  display: flex
+  overflow: auto
 
-    .client-button
-      margin: 0
-
-.title-históric
+.hello-user
+  display: flex
+  flex-direction: column
   width: 100%
+
+
+.hello-line1
   display: flex
-  justify-content: center
-  color: #fff
+  margin-bottom: 10px  
+  margin-top: 60px
 
-.search-dashboard
-  padding-right: 10px
+.hello-line2
   display: flex
 
-.gutter-row
-  width: 200px
-  height: 200px
-  text-align: center
+.hello-user p
+  font-size: 40px
+  color: white
+  margin: 0  // Remove margens padrão dos parágrafos
 
-.grid-background 
-  margin-top: 20px
-  width: 150px
-  height: 150px
+.hello-line1 p:nth-of-type(2), .hello-line2 p:nth-of-type(2)
+  padding-left: 10px  // Aplica padding somente ao segundo <p>
+  color:#FF3366
+
+.date-hour p
+  font-size: 24px
+  color: #A9A9A9
+
+.date-point
+  margin-top: 30px
+  display: flex
+  justify-content: space-between  // Distribui o espaço entre as divs
+
+.date-point > div
+  width: 48%                     // Ajusta a largura das divs
+
+.button-point
+  display: flex
+  align-items: center      // Centraliza o conteúdo verticalmente
+
+.button-point button
   padding: 10px
-  text-align: center
-  background-color: rgba(217, 217, 217, 0.15)
+  border: none
+  border-radius: 21px
+  background-color: #FF3366
+  color: #ffffff
+  cursor: pointer
+  margin-top: 30px
+  width: calc(100% - 35%)
+  height: 100px
+  display: flex            // Torna o botão um contêiner flexível
+  justify-content: center  // Centraliza o conteúdo horizontalmente
+  align-items: center      // Centraliza o conteúdo verticalmente
+
+.button-point button p
+  font-size: 30px
+  margin: 0                // Remove margens padrão dos parágrafos
+  text-align: center        // Centraliza o texto dentro do parágrafo
+
+.button-point button:hover
+  background-color: #FF0044
+
+.left-point
+  margin-left: 100px
+
+.right-point
+  display: flex
+  flex-direction: column   
+  justify-content: center  
+  align-items: flex-end    
+  gap: 20px 
+
+.container-hours, .container-map
+  display: flex
+  flex-direction: column
   justify-content: center
   align-items: center
-  border: 1px solid #C6C6C6
-  border-radius: 13px
+  width: 368px
+  height: 100px
+  background-color: #192831
+  border-radius: 15px
+  margin-right: 100px
 
-  &.gold 
-    background-color: #ffd70021
-    border: 1px solid #a19514
+.container-hours p, .container-map p
+  margin: 0
+  text-align: center
+
+.top-balace
+  font-size: 16px
+  color: white
+
+.low-balace
+  font-size: 36px
+  color: white
+
+.left-info p
+  font-size: 36px
+  color: white
+  margin: 0
+
+.localization-info 
+  display: flex
+  margin-top: 25px
+
+.localization-info p
+  font-size: 16px
   
 
-  &.silver 
-    background-color: #e7e7e742
-  
-
-  &.bronze 
-    background-color: #83390f4d
-    border: 1px solid #8d4001
-  
-
-  img 
-    max-height: 100%
-    max-width: 100%
-
-.ant-checkbox 
-  &-checked .ant-checkbox-inner 
-    background-color: black // Cor de fundo quando selecionado
-    border-color: black // Cor da borda quando selecionado
-  
-  
-  // Estilo para o hover do checkbox
-  &:hover 
-    .ant-checkbox-inner 
-      background-color: black // Cor de fundo no hover
-      border-color: black // Cor da borda no hover
-    
-  
-
-
-  
-
-
+.left-info 
+  margin-top: 40px
+  margin-left: 40px
