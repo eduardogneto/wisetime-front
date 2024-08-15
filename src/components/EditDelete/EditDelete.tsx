@@ -4,7 +4,12 @@ import { Button, Dropdown, Menu, message } from 'antd';
 import { EllipsisOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
-const EditDelete: React.FC = () => {
+// Define as props para o componente
+interface EditDeleteProps {
+    showDetail?: boolean; // Prop opcional para controlar a exibição do botão "Detalhar"
+}
+
+const EditDelete: React.FC<EditDeleteProps> = ({ showDetail = false }) => {
     // Função de callback para o botão Editar
     const handleEdit = () => {
         message.info('Ação de editar');
@@ -15,6 +20,12 @@ const EditDelete: React.FC = () => {
     const handleDelete = () => {
         message.info('Ação de deletar');
         // Adicione aqui a lógica para a ação de deletar
+    };
+
+    // Função de callback para o botão Detalhar
+    const handleDetail = () => {
+        message.info('Ação de detalhar');
+        // Adicione aqui a lógica para a ação de detalhar
     };
 
     // Define os itens do menu com callbacks
@@ -35,6 +46,14 @@ const EditDelete: React.FC = () => {
                 </span>
             ),
         },
+        ...(showDetail ? [{
+            key: '3',
+            label: (
+                <span onClick={handleDetail}>
+                    Detalhar
+                </span>
+            ),
+        }] : []),
     ];
 
     return (
