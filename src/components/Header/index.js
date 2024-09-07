@@ -36,7 +36,7 @@ const items = [
       {
         key: '4',
         label: 'Vencimento de Banco',
-        path: '/management/bank-expiration'
+        path: '/management/duedatebank'
       },
       {
         key: '5',
@@ -85,6 +85,7 @@ export default function Header() {
       '1': () => navigate('/dashboard'),
       '2': () => navigate('/historypoint'),
       '3': () => navigate('/management/users'),
+      '4': () => navigate('/management/duedatebank'),
       '8': handleExit,
     };
 

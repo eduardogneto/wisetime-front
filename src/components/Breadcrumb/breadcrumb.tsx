@@ -13,6 +13,7 @@ const BreadcrumbComponent: React.FC = () => {
         dashboard: 'Painel de Controle',
         settings: 'Configurações',
         historypoint: 'Histórico de Ponto',
+        duedatebank: 'Vencimento de Banco',
         // Adicione outros mapeamentos conforme necessário
     };
 

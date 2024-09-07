@@ -8,61 +8,81 @@
   margin-bottom: 50px 
   margin-top: 70px
 
-.ant-table 
-  background-color: transparent !important
-  border-collapse: separate !important
-  border-spacing: 0 20px !important // Espaçamento vertical entre as linhas
+.ant-select-arrow
+    color: #FF3366 !important
 
-.ant-table-thead
-  tr
-    th
-      color: white !important
-      background-color: #192831 !important
-      border: none !important
-      border-top-left-radius: 10px !important
-      border-top-right-radius: 10px !important
-      padding: 12px
-      text-align: center
-      display: none
+.ant-table-row-expand-icon:hover
+    color: #FF3366 !important
+
+.ant-table-row-expand-icon
+    color: #FF3366 !important
+    background-color: #192831 !important
+    border-color: #FF3366 !important
+
+.ant-table
+    background-color: #192831 !important
 
 .ant-table-tbody
-  tr
-    background-color: #192831
-    border-radius: 15px
-    display: grid
-    grid-template-columns: repeat(5, 1fr) // 5 colunas de largura igual
-    align-items: center
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1)
-    margin: 10px 0
+    td
+        color: white !important
+
+.ant-checkbox-checked .ant-checkbox-inner
+  background-color: #FF3366 !important
+  border-color: #FF3366 !important
+
+.ant-checkbox:hover .ant-checkbox-inner
+  border: 1px solid #FF3366 !important
+  
+.ant-checkbox-inner
+  background-color: rgb(25, 40, 49) !important
+  border: 1px solid rgb(180, 180, 180) !important
+
+.ant-checkbox-inner:after
+  background-color: #FF3366 !important
+
+.ant-table-wrapper 
+  .ant-table-tbody 
+    .ant-table-row.ant-table-row-selected 
+      .ant-table-cell
+        background-color: #3c4d57 !important
+
+.ant-table-thead
+tr
+    th
+        color: white !important
+        background-color: #4f6674 !important
+        border: none !important
+        padding: 10px 5px !important
+        text-align: center
+
+.ant-table-tbody
+    tr
+        background-color: #192831
+        border-radius: 15px
+        justify-content: space-between
+        align-items: center
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1)
+        margin: 10px 0
+        height: 45px
 
     td
-      color: white
-      border: none !important
-      text-align: center
-      padding: 12px 8px
+        color: white
+        border: none !important
+        text-align: center
+        flex: 1
+        padding: 10px 5px !important
 
     &:hover
-      background-color: #273e4d !important
+        background-color: #273e4d !important
 
-.ant-table-pagination
-  margin-right: auto
-  margin-left: auto
+    
+.ant-table-cell-row-hover
+  background-color: #ffffff00 !important
 
 .table
   width: calc(100% - 3%)
   height: calc(100% - 10%)
   padding: 16px
-
-.ant-table-cell-row-hover
-  background-color: #ffffff00 !important
-
-.ant-pagination-item
-  background-color: #FF426B !important
-  border-color: #dddddd00 !important
-  
-
-.ant-pagination-item a
-  color: white !important
 
 .add-user p
   font-family: 'Krona One', sans-serif
@@ -103,3 +123,6 @@
   border-color: #FF3366 !important
   color: #FF3366 !important
 
+.ant-input-affix-wrapper
+  width: 300px
+  height: 50px
