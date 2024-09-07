@@ -53,10 +53,15 @@ const items = [
         label: 'Cargos e Organizações',
         path: '/management/positions'
       },
+      {
+        key: '8',
+        label: 'Auditoria',
+        path: '/management/audit'
+      },
     ],
   },
   {
-    key: '8',
+    key: '9',
     icon: <ImportOutlined />,
     label: 'Sair',
   },
@@ -86,7 +91,8 @@ export default function Header() {
       '2': () => navigate('/historypoint'),
       '3': () => navigate('/management/users'),
       '4': () => navigate('/management/duedatebank'),
-      '8': handleExit,
+      '5': () => navigate('/management/requests'),
+      '9': handleExit,
     };
 
     if (actions[e.key]) {

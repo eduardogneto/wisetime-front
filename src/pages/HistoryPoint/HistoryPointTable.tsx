@@ -1,131 +1,147 @@
-import React, { useState } from 'react';
-import { Space, Switch, Table } from 'antd';
-import type { TableColumnsType, TableProps } from 'antd';
-
-type TableRowSelection<T extends object = object> = TableProps<T>['rowSelection'];
+import React, { useState } from 'react'
+import { ColumnsType } from 'antd/es/table'
+import { Table, Tag, Modal, Button, List } from 'antd'
+import EditDelete from '../../components/EditDelete/EditDelete.tsx'
 
 interface DataType {
-    key: React.ReactNode;
-    name: string;
-    age: number;
-    address: string;
-    children?: DataType[];
+  key: string
+  date: string
+  entrys: number
+  outs: number
+  tags: string[]
 }
 
-const columns: TableColumnsType<DataType> = [
-    {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
-    },
-    {
-        title: 'Age',
-        dataIndex: 'age',
-        key: 'age',
-        width: '12%',
-    },
-    {
-        title: 'Address',
-        dataIndex: 'address',
-        width: '30%',
-        key: 'address',
-    },
-];
+interface DetailData {
+  id: string
+  status: string
+  hours: string
+}
 
 const data: DataType[] = [
+  {
+    key: '1',
+    date: '10/11',
+    entrys: 2,
+    outs: 2,
+    tags: ['Completo'],
+  },
+  {
+    key: '2',
+    date: '09/11',
+    entrys: 1,
+    outs: 2,
+    tags: ['Incompleto'],
+  },
+  {
+    key: '3',
+    date: '08/11',
+    entrys: 2,
+    outs: 2,
+    tags: ['Completo'],
+  },
+]
+
+const mockDetailData: Record<string, DetailData[]> = {
+  '10/11': [
+    { id: '1', status: 'Entrada 1 - 10/11', hours: '08:00' },
+    { id: '2', status: 'Saida 1 - 10/11', hours: '12:00' },
+    { id: '3', status: 'Entrada 2 - 10/11', hours: '13:30' },
+    { id: '4', status: 'Saida 2 - 10/11', hours: '18:00' },
+    
+  ],
+  '09/11': [
+    { id: '3', status: 'Entrada 1 - 09/11', hours: 'Saída 1 - 09/11' },
+  ],
+  '08/11': [
+    { id: '4', status: 'Entrada 1 - 08/11', hours: 'Saída 1 - 08/11' },
+    { id: '5', status: 'Entrada 2 - 08/11', hours: 'Saída 2 - 08/11' },
+  ],
+}
+
+const HistoryPointTable: React.FC = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [detailData, setDetailData] = useState<DetailData[]>([])
+
+  const fetchDetailData = (date: string) => {
+    const data = mockDetailData[date] || []
+    setDetailData(data)
+  }
+
+  const handleDetail = (record: DataType) => {
+    fetchDetailData(record.date)
+    setIsModalVisible(true)
+  }
+
+  const columns: ColumnsType<DataType> = [
     {
-        key: 1,
-        name: 'John Brown sr.',
-        age: 60,
-        address: 'New York No. 1 Lake Park',
-        children: [
-            {
-                key: 11,
-                name: 'John Brown',
-                age: 42,
-                address: 'New York No. 2 Lake Park',
-            },
-            {
-                key: 12,
-                name: 'John Brown jr.',
-                age: 30,
-                address: 'New York No. 3 Lake Park',
-                children: [
-                    {
-                        key: 121,
-                        name: 'Jimmy Brown',
-                        age: 16,
-                        address: 'New York No. 3 Lake Park',
-                    },
-                ],
-            },
-            {
-                key: 13,
-                name: 'Jim Green sr.',
-                age: 72,
-                address: 'London No. 1 Lake Park',
-                children: [
-                    {
-                        key: 131,
-                        name: 'Jim Green',
-                        age: 42,
-                        address: 'London No. 2 Lake Park',
-                        children: [
-                            {
-                                key: 1311,
-                                name: 'Jim Green jr.',
-                                age: 25,
-                                address: 'London No. 3 Lake Park',
-                            },
-                            {
-                                key: 1312,
-                                name: 'Jimmy Green sr.',
-                                age: 18,
-                                address: 'London No. 4 Lake Park',
-                            },
-                        ],
-                    },
-                ],
-            },
-        ],
+      title: 'Data',
+      dataIndex: 'date',
+      key: 'date',
     },
     {
-        key: 2,
-        name: 'Joe Black',
-        age: 32,
-        address: 'Sydney No. 1 Lake Park',
+      title: 'Entradas',
+      dataIndex: 'entrys',
+      key: 'entrys',
+      render: (text: number) => `${text} Entradas`,
     },
-];
-
-// rowSelection objects indicates the need for row selection
-const rowSelection: TableRowSelection<DataType> = {
-    onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+    {
+      title: 'Saídas',
+      dataIndex: 'outs',
+      key: 'outs',
+      render: (text: number) => `${text} Saídas`,
     },
-    onSelect: (record, selected, selectedRows) => {
-        console.log(record, selected, selectedRows);
-    },
-    onSelectAll: (selected, selectedRows, changeRows) => {
-        console.log(selected, selectedRows, changeRows);
-    },
-};
-
-const App: React.FC = () => {
-
-
-    return (
+    {
+      title: 'Tags',
+      key: 'tags',
+      dataIndex: 'tags',
+      render: (_, { tags }) => (
         <>
-
-            <Table
-                style={{ marginTop: 20 }}
-                columns={columns}
-                rowSelection={{ ...rowSelection }}
-                dataSource={data}
-                pagination={false}
-                scroll={{ y: 400 }}
-            />
+          {tags.map(tag => {
+            let color = tag === 'Completo' ? 'green' : 'red'
+            return <Tag color={color} key={tag}>{tag.toUpperCase()}</Tag>
+          })}
         </>
-    );
-};
+      ),
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <EditDelete
+          showDetail
+          onDetail={() => handleDetail(record)}
+          allowDelete
+          allowEdit
+        />
+      ),
+    },
+  ]
 
-export default App;
+  return (
+    <>
+      <Table style={{ marginTop: 10 }} columns={columns} dataSource={data} />
+      
+      <Modal
+        title="Detalhes"
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={<Button onClick={() => setIsModalVisible(false)}>Fechar</Button>}
+      >
+        <List
+          itemLayout="horizontal"
+          dataSource={detailData}
+          renderItem={item => (
+            <List.Item>
+              <List.Item.Meta
+                title={`Status: ${item.status}`}
+                description={`Horario: ${item.hours}`}
+              />
+            </List.Item>
+          )}
+        />
+      </Modal>
+    </>
+  )
+}
+
+export default HistoryPointTable
