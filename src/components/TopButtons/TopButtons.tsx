@@ -41,7 +41,7 @@ export const TopButtons: React.FC<ITopButtons> = ({
                 ><Button
                         disabled={!isDeletable}
                         className="top-tool-buttons trash"
-                        icon={<DeleteOutlined style={{ fontSize: 23, color: '#FFF' }} />}
+                        icon={<DeleteOutlined style={{ fontSize: 23 }} />}
                     />
                 </Popconfirm>
             )}
@@ -50,7 +50,7 @@ export const TopButtons: React.FC<ITopButtons> = ({
                 />
             )}
             {handleNew && (
-                <Button type="text"onClick={handleNew}icon={<DownloadOutlined style={{fontSize:23, color: '#FFF' }} />}
+                <Button type="text" onClick={handleNew}icon={<DownloadOutlined style={{fontSize:23, color: '#FFF' }} />}
                 />
             )}
         </div>

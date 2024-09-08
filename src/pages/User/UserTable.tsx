@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Tag } from 'antd'; // Importe o Table e Tag do Ant Design
+import { Table, Tag } from 'antd';
 import api from '../../connection/api';
 
-// Definindo a interface User para representar os dados que o backend retorna
 interface Role {
   id: number;
   name: string;
@@ -13,32 +12,34 @@ interface User {
   name: string;
   email: string;
   role: Role;
-  tag: string; // Supondo que o campo tag seja uma string única
+  tag: string;
 }
 
-const UserTable: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]); // Especificando que users é uma lista de User
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // Definindo como string ou null
+interface UserTableProps {
+  onSelectUser: (user: User | null) => void; // Função para selecionar o usuário
+}
 
-  // Supondo que o organization_id do usuário visualizador está no localStorage
+const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
+
   const organizationId = localStorage.getItem('organizationId');
 
-  // Função para buscar usuários com o mesmo organizationId
   const fetchUsers = async () => {
     try {
       const response = await api.get('/api/users/organization', {
-        params: { organizationId }, // Envia o organization_id como parâmetro
+        params: { organizationId },
       });
       setUsers(response.data);
       setLoading(false);
     } catch (err) {
-      setError('Erro ao carregar usuários.'); // Definindo erro como string
+      setError('Erro ao carregar usuários.');
       setLoading(false);
     }
   };
 
-  // Buscar os usuários quando o componente for montado
   useEffect(() => {
     if (organizationId) {
       fetchUsers();
@@ -48,28 +49,11 @@ const UserTable: React.FC = () => {
     }
   }, [organizationId]);
 
-  // Definindo as colunas da tabela
   const columns = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-    },
-    {
-      title: 'Nome',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: 'Cargo',
-      dataIndex: ['role', 'name'], // Acessa o nome do cargo dentro do role
-      key: 'role',
-    },
+    { title: 'ID', dataIndex: 'id', key: 'id' },
+    { title: 'Nome', dataIndex: 'name', key: 'name' },
+    { title: 'Email', dataIndex: 'email', key: 'email' },
+    { title: 'Cargo', dataIndex: ['role', 'name'], key: 'role' },
     {
       title: 'Tag',
       dataIndex: 'tag',
@@ -90,16 +74,19 @@ const UserTable: React.FC = () => {
     },
   ];
 
-  // Configurando rowSelection (caso necessário)
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: User[]) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      setSelectedRowKeys(selectedRowKeys as number[]);
+      if (selectedRows.length === 1) {
+        onSelectUser(selectedRows[0]); // Passa o único usuário selecionado
+      } else {
+        onSelectUser(null); // Desabilita se não houver ou houver mais de um
+      }
     },
   };
 
-  // Configurando o dataSource a partir dos usuários carregados
   const data = users.map(user => ({
-    key: user.id, // Ant Design precisa de uma chave única para cada linha
+    key: user.id,
     ...user,
   }));
 
@@ -112,7 +99,10 @@ const UserTable: React.FC = () => {
       scroll={{ y: 400 }}
       columns={columns}
       dataSource={data}
-      rowSelection={{ ...rowSelection }}
+      rowSelection={{
+        type: 'checkbox',
+        ...rowSelection,
+      }}
       style={{ marginTop: 20 }}
     />
   );
