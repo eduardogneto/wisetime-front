@@ -49,7 +49,7 @@ const BreadcrumbComponent: React.FC = () => {
                 {pathParts[0] === 'management' && (
                     <Breadcrumb.Item>
                         <Dropdown overlay={menuItems}>
-                            <a >Painel de Gestão</a>
+                            <a >Painel de Gestor</a>
                         </Dropdown>
                     </Breadcrumb.Item>
                 )}

@@ -1,5 +1,11 @@
-import axios from "axios";
+import axios from 'axios';
 
-export default axios.create({
-    baseURL: 'http://localhost:3001'
-})
+// Cria uma instância do axios com a baseURL do backend Spring Boot
+const api = axios.create({
+    baseURL: 'http://localhost:8080', // Certifique-se de que o backend está rodando nesta URL
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+export default api;

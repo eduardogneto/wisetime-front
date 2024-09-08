@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { ColumnsType } from 'antd/es/table'
-import { Table, Tag, Modal, Button, List } from 'antd'
+import { Table, Tag, Modal, Button, List, Avatar } from 'antd'
 import EditDelete from '../../components/EditDelete/EditDelete.tsx'
 
 interface DataType {
   key: string
   date: string
-  entrys: number
-  outs: number
+  applicant: string
+  type: string
   tags: string[]
 }
 
@@ -21,23 +21,30 @@ const data: DataType[] = [
   {
     key: '1',
     date: '10/11',
-    entrys: 2,
-    outs: 2,
-    tags: ['Completo'],
+    applicant: 'Eduardo Neto',
+    type: 'Atestado',
+    tags: ['Em Aberto'],
   },
   {
     key: '2',
-    date: '09/11',
-    entrys: 1,
-    outs: 2,
-    tags: ['Incompleto'],
+    date: '10/11',
+    applicant: 'Eduardo Neto',
+    type: 'Atestado',
+    tags: ['Aprovado'],
   },
   {
     key: '3',
-    date: '08/11',
-    entrys: 2,
-    outs: 2,
-    tags: ['Completo'],
+    date: '10/11',
+    applicant: 'Eduardo Neto',
+    type: 'Atestado',
+    tags: ['Reprovado'],
+  },
+  {
+    key: '4',
+    date: '10/11',
+    applicant: 'Eduardo Neto',
+    type: 'Atestado',
+    tags: ['a'],
   },
 ]
 
@@ -72,6 +79,12 @@ const HistoryPointTable: React.FC = () => {
     setIsModalVisible(true)
   }
 
+  const getInitials = (applicant: string) => {
+    const nameParts = applicant.split(' ');
+    const initials = nameParts.map(part => part.charAt(0)).join('');
+    return initials.substring(0, 2).toUpperCase();
+};
+
   const columns: ColumnsType<DataType> = [
     {
       title: 'Data',
@@ -79,16 +92,22 @@ const HistoryPointTable: React.FC = () => {
       key: 'date',
     },
     {
-      title: 'Entradas',
-      dataIndex: 'entrys',
-      key: 'entrys',
-      render: (text: number) => `${text} Entradas`,
+      title: 'Solicitante',
+      dataIndex: 'applicant',
+      key: 'applicant',
+      render: (text: string) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginRight: 15 }}>
+                {getInitials(text)}
+            </Avatar>
+            {text}
+        </div>
+    ),
     },
     {
-      title: 'Saídas',
-      dataIndex: 'outs',
-      key: 'outs',
-      render: (text: number) => `${text} Saídas`,
+      title: 'Tipo',
+      dataIndex: 'type',
+      key: 'type',
     },
     {
       title: 'Tags',
@@ -97,14 +116,23 @@ const HistoryPointTable: React.FC = () => {
       render: (_, { tags }) => (
         <>
           {tags.map(tag => {
-            let color = tag === 'Completo' ? 'green' : 'red'
+            let color
+            if(tag === 'Em Aberto'){
+              color = 'blue'
+            } else if (tag === 'Aprovado'){
+              color = 'green'
+            } else if (tag === 'Reprovado'){
+              color = 'red'
+            } else {
+              color = 'yellow'
+              tag = 'ERRO'
+            }
             return <Tag color={color} key={tag}>{tag.toUpperCase()}</Tag>
           })}
         </>
       ),
     },
     {
-      title: 'Action',
       key: 'action',
       render: (_, record) => (
         <EditDelete

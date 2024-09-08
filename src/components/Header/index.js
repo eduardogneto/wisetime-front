@@ -10,68 +10,79 @@ import {
 import { Menu, Avatar } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const items = [
-  {
-    key: '1',
-    icon: <PieChartOutlined />,
-    label: 'Bater Ponto',
-    path: '/dashboard'
-  },
-  {
-    key: '2',
-    icon: <ContainerOutlined />,
-    label: 'Histórico de Ponto',
-    path: '/historypoint'
-  },
-  {
-    key: 'sub1',
-    label: 'Painel de Gestor',
-    icon: <DesktopOutlined />,
-    children: [
-      {
-        key: '3',
-        label: 'Usuários',
-        path: '/management/users'
-      },
-      {
-        key: '4',
-        label: 'Vencimento de Banco',
-        path: '/management/duedatebank'
-      },
-      {
-        key: '5',
-        label: 'Solicitações',
-        path: '/management/requests'
-      },
-      {
-        key: '6',
-        label: 'Relatórios',
-        path: '/management/reports'
-      },
-      {
-        key: '7',
-        label: 'Cargos e Organizações',
-        path: '/management/positions'
-      },
-      {
-        key: '8',
-        label: 'Auditoria',
-        path: '/management/audit'
-      },
-    ],
-  },
-  {
-    key: '9',
-    icon: <ImportOutlined />,
-    label: 'Sair',
-  },
-];
-
 export default function Header() {
   const [collapsed, setCollapsed] = useState(true); 
   const [selectedKeys, setSelectedKeys] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Defina a variável items dentro do componente
+  const items = [
+    {
+      key: '1',
+      icon: <PieChartOutlined />,
+      label: 'Bater Ponto',
+      path: '/dashboard'
+    },
+    {
+      key: '2',
+      icon: <ContainerOutlined />,
+      label: 'Histórico de Ponto',
+      path: '/historypoint'
+    },
+    {
+      key: 'sub1',
+      label: 'Painel de Gestor',
+      icon: <DesktopOutlined />,
+      children: [
+        {
+          key: '3',
+          label: 'Usuários',
+          path: '/management/users'
+        },
+        {
+          key: '4',
+          label: 'Vencimento de Banco',
+          path: '/management/duedatebank'
+        },
+        {
+          key: '5',
+          label: 'Solicitações',
+          path: '/management/requests'
+        },
+        {
+          key: '6',
+          label: 'Relatórios',
+          path: '/management/reports'
+        },
+        {
+          key: '7',
+          label: 'Cargos e Organizações',
+          path: '/management/positions'
+        },
+        {
+          key: '8',
+          label: 'Auditoria',
+          path: '/management/audit'
+        },
+      ],
+    },
+    {
+      key: '9',
+      icon: <ImportOutlined />,
+      label: 'Sair',
+    },
+  ];
+
+  const getNameFromLocalStorage = () => {
+    const name = localStorage.getItem('name') || '';
+    return {
+      firstName: name ? name.split(' ')[0] : '',
+      initials: name ? name.split(' ').map(part => part.charAt(0)).join('').substring(0, 2).toUpperCase() : '',
+    };
+  };
+
+  const { firstName, initials } = getNameFromLocalStorage();
 
   useEffect(() => {
     const path = location.pathname;
@@ -101,11 +112,8 @@ export default function Header() {
   };
 
   const handleExit = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('id');
-    localStorage.removeItem('name');
-    localStorage.removeItem('email');
-    window.location.href = '/login';
+    localStorage.clear(); 
+    window.location.href = '/login'; 
   };
 
   return (
@@ -119,8 +127,8 @@ export default function Header() {
           <h1><span className='pink'>W</span>iseTime</h1>
         </div>
         <div className='rightbar'>
-          <p>Eduardo</p>
-          <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginLeft: 15}}>EN</Avatar>
+          <p>{firstName}</p>
+          <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginLeft: 15 }}>{initials}</Avatar>
         </div>
       </div>
       <div className='sidebar'>

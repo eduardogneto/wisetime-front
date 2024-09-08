@@ -1,125 +1,121 @@
-import Header from '../../components/Header';
-import './style.sass';
-import { Button, Table, Tag, Input, Dropdown, Modal, Avatar } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
 import React, { useEffect, useState } from 'react';
-import {
-    SearchOutlined,
-    EllipsisOutlined,
-} from '@ant-design/icons';
-import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
-import EditDelete from '../../components/EditDelete/EditDelete.tsx';
-import { TableRowSelection } from 'antd/es/table/interface';
+import { Table, Tag } from 'antd'; // Importe o Table e Tag do Ant Design
+import api from '../../connection/api';
 
-interface DataType {
-    key: string;
-    name: string;
-    organization: string;
-    role: string;
-    tags: string[];
+// Definindo a interface User para representar os dados que o backend retorna
+interface Role {
+  id: number;
+  name: string;
 }
 
-// Função para obter as iniciais do nome
-const getInitials = (name: string) => {
-    const nameParts = name.split(' ');
-    const initials = nameParts.map(part => part.charAt(0)).join('');
-    return initials.substring(0, 2).toUpperCase();
-};
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: Role;
+  tag: string; // Supondo que o campo tag seja uma string única
+}
 
-const columns: ColumnsType<DataType> = [
-    {
-        title: 'Nome',
-        dataIndex: 'name',
-        key: 'name',
-        render: (text: string) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginRight: 15 }}>
-                    {getInitials(text)}
-                </Avatar>
-                {text}
-            </div>
-        ),
-        align: 'center'
-    },
-    {
-        title: 'Organização',
-        dataIndex: 'organization',
-        key: 'organization',
-        align: 'center'
-    },
-    {
-        title: 'Cargo',
-        dataIndex: 'role',
-        key: 'role',
-        align: 'center'
-    },
-    {
-        title: 'Tags',
-        key: 'tags',
-        dataIndex: 'tags',
-        render: (_, { tags }) => (
-            <>
-                {tags.map(tag => {
-                    let color = tag === 'Coordenador' ? 'orange' : 'geekblue';
-                    if (tag === 'Funcionário') {
-                        color = 'pink';
-                    }
-                    return (
-                        <Tag color={color} key={tag}>
-                            {tag.toUpperCase()}
-                        </Tag>
-                    );
-                })}
-            </>
-        ),
-        align: 'center'
-    },
-];
+const UserTable: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]); // Especificando que users é uma lista de User
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null); // Definindo como string ou null
 
-const data: DataType[] = [
-    {
-        key: '1',
-        name: 'John Brown',
-        organization: 'Teste1',
-        role: 'CTO',
-        tags: ['Administrador'],
-    },
-    {
-        key: '2',
-        name: 'Jim Green',
-        organization: 'Teste1',
-        role: 'Analista I',
-        tags: ['Funcionário'],
-    },
-    {
-        key: '3',
-        name: 'Joe Black',
-        organization: 'Teste1',
-        role: 'Project Owner',
-        tags: ['Coordenador'],
-    },
-];
+  // Supondo que o organization_id do usuário visualizador está no localStorage
+  const organizationId = localStorage.getItem('organizationId');
 
-const rowSelection: TableRowSelection<DataType> = {
-    onChange: (selectedRowKeys, selectedRows) => {
+  // Função para buscar usuários com o mesmo organizationId
+  const fetchUsers = async () => {
+    try {
+      const response = await api.get('/api/users/organization', {
+        params: { organizationId }, // Envia o organization_id como parâmetro
+      });
+      setUsers(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError('Erro ao carregar usuários.'); // Definindo erro como string
+      setLoading(false);
+    }
+  };
+
+  // Buscar os usuários quando o componente for montado
+  useEffect(() => {
+    if (organizationId) {
+      fetchUsers();
+    } else {
+      setError('Organization ID não encontrado.');
+      setLoading(false);
+    }
+  }, [organizationId]);
+
+  // Definindo as colunas da tabela
+  const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+    },
+    {
+      title: 'Nome',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+    },
+    {
+      title: 'Cargo',
+      dataIndex: ['role', 'name'], // Acessa o nome do cargo dentro do role
+      key: 'role',
+    },
+    {
+      title: 'Tag',
+      dataIndex: 'tag',
+      key: 'tag',
+      render: (tag: string) => {
+        let color = 'geekblue';
+        if (tag === 'COORDENADOR') {
+          color = 'orange';
+        } else if (tag === 'FUNCIONARIO') {
+          color = 'pink';
+        }
+        return (
+          <Tag color={color} key={tag}>
+            {tag.toUpperCase()}
+          </Tag>
+        );
+      },
+    },
+  ];
+
+  // Configurando rowSelection (caso necessário)
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: User[]) => {
       console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    onSelect: (record, selected, selectedRows) => {
-      console.log(record, selected, selectedRows);
-    },
-    onSelectAll: (selected, selectedRows, changeRows) => {
-      console.log(selected, selectedRows, changeRows);
     },
   };
 
-const UserTable: React.FC = () => {
+  // Configurando o dataSource a partir dos usuários carregados
+  const data = users.map(user => ({
+    key: user.id, // Ant Design precisa de uma chave única para cada linha
+    ...user,
+  }));
 
+  if (loading) return <p>Carregando...</p>;
+  if (error) return <p>{error}</p>;
 
-    return (
-        <div>
-            <Table pagination={false} scroll={{ y: 400 }} columns={columns} dataSource={data} rowSelection={{...rowSelection}} style={{ marginTop: 20 }} />
-        </div>
-    );
+  return (
+    <Table
+      pagination={false}
+      scroll={{ y: 400 }}
+      columns={columns}
+      dataSource={data}
+      rowSelection={{ ...rowSelection }}
+      style={{ marginTop: 20 }}
+    />
+  );
 };
 
 export default UserTable;
