@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Krona+One&display=swap')
-  
+
 .container-point
   width: 1300px
   height: 480px
@@ -7,12 +7,11 @@
   border-radius: 15px
   display: flex
   flex-direction: column
-  margin-bottom: 50px 
+  margin-bottom: 50px
   margin-top: 70px
-  
+
 p
   font-family: 'Krona One', sans-serif
-
 
 .container-infos
   width: 1300px
@@ -27,10 +26,9 @@ p
   flex-direction: column
   width: 100%
 
-
 .hello-line1
   display: flex
-  margin-bottom: 10px  
+  margin-bottom: 10px
   margin-top: 60px
 
 .hello-line2
@@ -39,11 +37,11 @@ p
 .hello-user p
   font-size: 40px
   color: white
-  margin: 0  // Remove margens padrão dos parágrafos
+  margin: 0 // Remove margens padrão dos parágrafos
 
 .hello-line1 p:nth-of-type(2), .hello-line2 p:nth-of-type(2)
-  padding-left: 10px  // Aplica padding somente ao segundo <p>
-  color:#FF3366
+  padding-left: 10px // Aplica padding somente ao segundo <p>
+  color: #FF3366
 
 .date-hour p
   font-size: 24px
@@ -52,14 +50,14 @@ p
 .date-point
   margin-top: 30px
   display: flex
-  justify-content: space-between  // Distribui o espaço entre as divs
+  justify-content: space-between // Distribui o espaço entre as divs
 
 .date-point > div
-  width: 48%                     // Ajusta a largura das divs
+  width: 48% // Ajusta a largura das divs
 
 .button-point
   display: flex
-  align-items: center      // Centraliza o conteúdo verticalmente
+  align-items: center // Centraliza o conteúdo verticalmente
 
 .button-point button
   padding: 10px
@@ -71,14 +69,14 @@ p
   margin-top: 30px
   width: calc(100% - 35%)
   height: 100px
-  display: flex            // Torna o botão um contêiner flexível
-  justify-content: center  // Centraliza o conteúdo horizontalmente
-  align-items: center      // Centraliza o conteúdo verticalmente
+  display: flex // Torna o botão um contêiner flexível
+  justify-content: center // Centraliza o conteúdo horizontalmente
+  align-items: center // Centraliza o conteúdo verticalmente
 
 .button-point button p
   font-size: 30px
-  margin: 0                // Remove margens padrão dos parágrafos
-  text-align: center        // Centraliza o texto dentro do parágrafo
+  margin: 0 // Remove margens padrão dos parágrafos
+  text-align: center // Centraliza o texto dentro do parágrafo
 
 .button-point button:hover
   background-color: #FF0044
@@ -88,10 +86,10 @@ p
 
 .right-point
   display: flex
-  flex-direction: column   
-  justify-content: center  
-  align-items: flex-end    
-  gap: 20px 
+  flex-direction: column
+  justify-content: center
+  align-items: flex-end
+  gap: 20px
 
 .container-hours, .container-map
   display: flex
@@ -121,14 +119,43 @@ p
   color: white
   margin: 0
 
-.localization-info 
+.localization-info
   display: flex
   margin-top: 25px
 
 .localization-info p
   font-size: 16px
-  
 
-.left-info 
-  margin-top: 40px
+.left-info
+  margin-top: 20px
   margin-left: 40px
+
+
+
+
+
+.punch-logs
+  display: flex
+  flex-direction: row // Alinha os horários na horizontal
+  gap: 30px // Espaçamento entre cada horário registrado
+  margin-top: 20px
+
+.punch-log
+  display: flex
+  align-items: center
+  font-size: 20px
+  color: white
+
+.punch-log b
+  margin-left: 10px
+  font-size: 24px
+  color: #ffffff // Deixa o horário branco
+
+.punch-log span.type
+  font-size: 18px
+  color: #A9A9A9 // Deixa o "E" ou "S" mais escuro
+  margin-left: 5px // Dá um espaço entre a hora e o "E" ou "S"
+
+.punch-log span.separator
+  margin: 0 10px // Adiciona um espaço ao redor da barra separadora
+  color: #ffffff

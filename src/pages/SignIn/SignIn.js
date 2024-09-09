@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './signin.css'; // Arquivo de estilo
 import logo from "../../assets/image1.png"; // Imagem importada
+import api from '../../connection/api';
 import { message } from 'antd'; // Biblioteca de mensagens (se necessário)
 
 export default function SignIn() {
@@ -25,34 +26,50 @@ export default function SignIn() {
         }
     };
 
+    const setLocalStorage = (key, value) => {
+        return new Promise((resolve) => {
+            localStorage.setItem(key, value);
+            resolve();
+        });
+    };
+
     async function logIn(email, password) {
         setLoadingAuth(true);
+        try {
+            const response = await api.post('/api/users/login', {
+                email: email,
+                password: password,
+            });
 
-        const simulatedUser = {
-            id: '12345',
-            name: 'Usuário Exemplo',
-            email: email,
-        };
+            const data = response.data;
 
-        setTimeout(() => {
-            try {
-                const data = simulatedUser;
-                localStorage.setItem('token', data.id);
-                localStorage.setItem('id', data.id);
-                localStorage.setItem('name', data.name);
-                localStorage.setItem('email', data.email);
-                message.success(`Bem-vindo de volta ${data.name}!`);
+            // Definindo o localStorage com Promises
+            await Promise.all([
+                setLocalStorage('token', data.id),
+                setLocalStorage('id', data.id),
+                setLocalStorage('name', data.name),
+                setLocalStorage('email', data.email),
+                setLocalStorage('organizationId', data.organization_id),
+                setLocalStorage('tag', data.tag)
+            ]);
 
-                setTimeout(() => {
-                    window.location.reload();
-                    setLoadingAuth(false);
-                }, 2000);
-            } catch (err) {
-                console.log(err);
-                message.error('Ops, algo deu errado!');
+            message.success(`Bem-vindo de volta ${data.name}!`);
+
+            // Depois que o localStorage estiver configurado, recarrega a página
+            setTimeout(() => {
                 setLoadingAuth(false);
+                window.location.reload();
+            }, 2000);
+
+        } catch (error) {
+            setLoadingAuth(false);
+            console.log(error);
+            if (error.response && error.response.status === 401) {
+                message.error('Email ou senha inválidos. Por favor, tente novamente.');
+            } else {
+                message.error('Ops, algo deu errado!');
             }
-        }, 1000);
+        }
     }
 
     const sendEnter = (e) => {
@@ -106,7 +123,6 @@ export default function SignIn() {
                             </form>
                         <div className='button-form'>
                         <button type='submit' onClick={handleSubmit} onKeyDown={sendEnter}>{loadingAuth ? 'Carregando...' : 'Entrar'}</button>
-
                         </div>
                         </div>
                     </div>
@@ -115,3 +131,4 @@ export default function SignIn() {
         </div>
     );
 }
+
