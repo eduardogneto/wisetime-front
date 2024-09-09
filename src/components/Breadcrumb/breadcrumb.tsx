@@ -13,6 +13,8 @@ const BreadcrumbComponent: React.FC = () => {
         dashboard: 'Painel de Controle',
         settings: 'Configurações',
         historypoint: 'Histórico de Ponto',
+        duedatebank: 'Vencimento de Banco',
+        requests: 'Solicitações',
         // Adicione outros mapeamentos conforme necessário
     };
 
@@ -47,7 +49,7 @@ const BreadcrumbComponent: React.FC = () => {
                 {pathParts[0] === 'management' && (
                     <Breadcrumb.Item>
                         <Dropdown overlay={menuItems}>
-                            <a >Painel de Gestão</a>
+                            <a >Painel de Gestor</a>
                         </Dropdown>
                     </Breadcrumb.Item>
                 )}

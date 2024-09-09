@@ -5,88 +5,15 @@ import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
 import Header from '../../components/Header';
 import EditDelete from '../../components/EditDelete/EditDelete.tsx';
 import { ColumnsType } from 'antd/es/table/InternalTable';
+import HistoryPointTable from './HistoryPointTable.tsx';
+import { TopButtons } from '../../components/TopButtons/TopButtons.tsx';
 
 const HistoryPoint: React.FC = () => {
     const handleChange = (value: string) => {
         console.log(`selected ${value}`);
     };
 
-    interface DataType {
-        key: string;
-        date: string;
-        entrys: number;
-        outs: number;
-        tags: string[];
-    }
 
-    const columns: ColumnsType<DataType> = [
-        {
-            title: 'Data',
-            dataIndex: 'date',
-            key: 'date',
-        },
-        {
-            title: 'Entradas',
-            dataIndex: 'entrys',
-            key: 'entrys',
-            render: (text: number) => `${text} Entradas`,
-        },
-        {
-            title: 'Saídas',
-            dataIndex: 'outs',
-            key: 'outs',
-            render: (text: number) => `${text} Saídas`,
-        },
-        {
-            title: 'Tags',
-            key: 'tags',
-            dataIndex: 'tags',
-            render: (_, { tags }) => (
-                <>
-                    {tags.map(tag => {
-                        let color = tag === 'Completo' ? 'green' : 'red';
-                        
-                        return (
-                            <Tag color={color} key={tag}>
-                                {tag.toUpperCase()}
-                            </Tag>
-                        );
-                    })}
-                </>
-            ),
-        },
-        {
-            title: 'Action',
-            key: 'action',
-            render: (_) => (
-                <EditDelete showDetail />
-            ),
-        },
-    ];
-
-    const data: DataType[] = [
-        {
-            key: '1',
-            date: '10/11',
-            entrys: 2,
-            outs: 2,
-            tags: ['Completo'],
-        },
-        {
-            key: '2',
-            date: '09/11',
-            entrys: 1,
-            outs: 2,
-            tags: ['Incompleto'],
-        },
-        {
-            key: '3',
-            date: '08/11',
-            entrys: 2,
-            outs: 2,
-            tags: ['Completo'],
-        },
-    ];
 
     return (
         <div>
@@ -128,17 +55,11 @@ const HistoryPoint: React.FC = () => {
                             />
                         </div>
                         <div className='right-filters'>
-                            <div className='button-history'>
-                                <button type='submit'>
-                                    <p>Baixar</p>
-                                </button>
-                                <button type='submit'>
-                                    <p>Exportar</p>
-                                </button>
-                            </div>
+                            <TopButtons
+                                 />
                         </div>
                     </div>
-                    <Table style={{ marginTop: 10 }} columns={columns} dataSource={data} />
+                    <HistoryPointTable />
                 </div>
             </div>
         </div>
