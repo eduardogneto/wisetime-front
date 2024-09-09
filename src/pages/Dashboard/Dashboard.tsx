@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import './style.sass';
-import { EnvironmentOutlined } from '@ant-design/icons';
+import { EnvironmentOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Button, message } from 'antd';
+import api from '../../connection/api'; // Supondo que você tenha configurado o Axios
 
 const name = localStorage.getItem('name');
+const userId = localStorage.getItem('id'); // Pega o userId do localStorage
 
 const Dashboard: React.FC = () => {
   const [currentDateTime, setCurrentDateTime] = useState('');
   const [userLocation, setUserLocation] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // Estado de loading para o botão
+  const [punchLogs, setPunchLogs] = useState([]); // Armazena os registros de ponto
 
   // Função para formatar data e hora
   const formatDate = (date: Date) => {
     const day = date.getDate();
-    const month = date.toLocaleString('pt-BR', { month: 'long' }); 
+    const month = date.toLocaleString('pt-BR', { month: 'long' });
     const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0'); 
+    const minutes = date.getMinutes().toString().padStart(2, '0');
 
     return `${day} de ${month.charAt(0).toUpperCase() + month.slice(1)}, ${hours}h${minutes}min`;
   };
@@ -27,10 +32,10 @@ const Dashboard: React.FC = () => {
       setCurrentDateTime(formatDate(now));
     };
 
-    updateDateTime(); 
-    const intervalId = setInterval(updateDateTime, 1000); 
+    updateDateTime();
+    const intervalId = setInterval(updateDateTime, 1000);
 
-    return () => clearInterval(intervalId); 
+    return () => clearInterval(intervalId);
   }, []);
 
   // Função para pegar localização do usuário
@@ -50,7 +55,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Função para buscar endereço com a API Nominatim
   const fetchAddress = async (latitude: number, longitude: number) => {
     try {
       const response = await fetch(
@@ -63,10 +67,78 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Obtém a localização quando o componente é montado
   useEffect(() => {
     getUserLocation();
+    fetchPunchLogs(); // Buscar registros de ponto ao carregar o componente
   }, []);
+
+  // Função para buscar registros de ponto do usuário no dia atual
+  // Função para buscar registros de ponto do usuário no dia atual e ordená-los por horário
+  const fetchPunchLogs = async () => {
+    try {
+      const response = await api.get(`/api/punch/history/${userId}/${new Date().toISOString().split('T')[0]}`);
+      if (response.status === 200) {
+        // Ordena os registros de ponto pelo horário (timestamp)
+        const sortedLogs = response.data.sort((a: any, b: any) => {
+          const timeA = new Date(a.timestamp).getTime();
+          const timeB = new Date(b.timestamp).getTime();
+          return timeA - timeB; // Ordena em ordem crescente
+        });
+        setPunchLogs(sortedLogs); // Salva os registros de ponto ordenados na variável de estado
+      } else {
+        setPunchLogs([]);
+        message.error('Falha ao buscar os registros de ponto.');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar registros de ponto:', error);
+      setPunchLogs([]);
+      message.error('Erro ao buscar os registros de ponto.');
+    }
+  };
+
+
+  // Função para enviar a requisição de Bater Ponto
+  const handlePunchClock = async () => {
+    if (!userId) {
+      message.error('Usuário não encontrado.');
+      return;
+    }
+
+    const timestamp = new Date().toISOString(); // Pega o horário atual no formato ISO
+    const type = 'ENTRY'; // Aqui você pode mudar para ENTRY ou EXIT baseado na lógica de entrada e saída
+
+    setLoading(true); // Inicia o loading no botão
+
+    try {
+      const response = await api.post('/api/punch/log', {
+        userId,
+        timestamp,
+        type,
+        location: userLocation || null, // Envia a localização, pode ser null se não obtiver
+      });
+
+      if (response.status === 200) {
+        message.success('Batida de ponto registrada com sucesso!');
+        fetchPunchLogs(); // Atualiza a lista de batidas após o registro
+      } else {
+        message.error('Falha ao registrar a batida de ponto.');
+      }
+    } catch (error) {
+      console.error('Erro ao registrar ponto:', error);
+      message.error('Erro ao registrar a batida de ponto.');
+    } finally {
+      setLoading(false); // Finaliza o loading no botão
+    }
+  };
+
+  const getInitials = (applicant: string) => {
+    if (typeof applicant === 'string') {
+      const nameParts = applicant.split(' ');
+      const initials = nameParts.map(part => part.charAt(0)).join('');
+      return initials.substring(0, 2).toUpperCase();
+    }
+    return 'NN'; // Se não for string, retorna "NN" como iniciais padrão
+  };
 
   return (
     <div>
@@ -86,12 +158,12 @@ const Dashboard: React.FC = () => {
           <div className='date-point'>
             <div className='date-button'>
               <div className='date-hour'>
-                <p>{currentDateTime}</p> 
+                <p>{currentDateTime}</p>
               </div>
               <div className='button-point'>
-                <button type='submit'>
-                  <p>Bater Ponto</p>
-                </button>
+                <Button type="primary" onClick={handlePunchClock} loading={loading}>
+                  <h1 style={{fontSize:40}}>Bater Ponto</h1>
+                </Button>
               </div>
             </div>
             <div className='right-point'>
@@ -113,7 +185,24 @@ const Dashboard: React.FC = () => {
       </div>
       <div className='container-infos'>
         <div className='left-info'>
-          <p>Nenhum ponto registrado!</p>
+          <div className="punch-logs">
+            {punchLogs.length === 0 ? (
+              <p>Nenhum ponto registrado!</p>
+            ) : (
+              punchLogs.map((log: any, index: number) => (
+                <div className="punch-log" key={log.id}>
+                  <CheckCircleOutlined
+                    style={{
+                      fontSize: 23,
+                      color: log.location ? '#FF3366' : '#A9A9A9' // Se há localização, usa a cor padrão, senão usa cinza
+                    }}
+                  />
+                  <b>{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b>
+                  <span className="type">{log.type === 'ENTRY' ? 'E' : 'S'}</span>
+                </div>
+              ))
+            )}
+          </div>
           <div className='localization-info'>
             <EnvironmentOutlined style={{ fontSize: 23, color: '#FF3366' }} />
             {error ? (
@@ -124,6 +213,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+
     </div>
   );
 };

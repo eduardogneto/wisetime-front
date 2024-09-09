@@ -20,10 +20,6 @@ const DueDateBank: React.FC = () => {
 
   const organizationId = localStorage.getItem('organizationId'); // Pegando o organizationId do localStorage
 
-  const handleChangeOrganization = (value: string) => {
-    setOrganizationId(value); // Se você tiver opções de organizações
-  };
-
   const handleTagChange = (value: string) => {
     setTag(value);
   };
@@ -90,7 +86,6 @@ const DueDateBank: React.FC = () => {
           <div className='filters-history' style={{ marginTop: 10 }}>
             <div className='left-filters'>
               <Select
-                onChange={handleChangeOrganization}
                 className='select'
                 placeholder="Selecione a Organização"
                 options={[

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Tag } from 'antd';
+import { Avatar, Table, Tag } from 'antd';
 import api from '../../connection/api';
 
 interface Role {
@@ -18,6 +18,15 @@ interface User {
 interface UserTableProps {
   onSelectUser: (user: User | null) => void; // Função para selecionar o usuário
 }
+
+const getInitials = (applicant: string) => {
+  if (typeof applicant === 'string') {
+    const nameParts = applicant.split(' ');
+    const initials = nameParts.map(part => part.charAt(0)).join('');
+    return initials.substring(0, 2).toUpperCase();
+  }
+  return 'NN'; // Se não for string, retorna "NN" como iniciais padrão
+};
 
 const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
   const [users, setUsers] = useState<User[]>([]);
@@ -50,8 +59,16 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
   }, [organizationId]);
 
   const columns = [
-    { title: 'ID', dataIndex: 'id', key: 'id' },
-    { title: 'Nome', dataIndex: 'name', key: 'name' },
+    { title: 'Nome', dataIndex: 'name', key: 'name',
+      render: (text: string) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginRight: 15 }}>
+            {getInitials(text)}
+          </Avatar>
+          {text}
+        </div>
+      ),
+    },
     { title: 'Email', dataIndex: 'email', key: 'email' },
     { title: 'Cargo', dataIndex: ['role', 'name'], key: 'role' },
     {

@@ -1,113 +1,139 @@
-import React, { useState } from 'react'
-import { ColumnsType } from 'antd/es/table'
-import { Table, Tag, Modal, Button, List, Avatar } from 'antd'
-import EditDelete from '../../components/EditDelete/EditDelete.tsx'
+import React, { useState, useEffect } from 'react';
+import { ColumnsType } from 'antd/es/table';
+import { Table, Tag, Avatar, message, Modal, List, Button } from 'antd';
+import EditDelete from '../../components/EditDelete/EditDelete.tsx';
+import api from '../../connection/api'; // Supondo que você tenha configurado Axios
+
+interface Punch {
+  status: string;
+  hours: string;
+}
 
 interface DataType {
-  key: string
-  date: string
-  applicant: string
-  type: string
-  tags: string[]
+  key: string;
+  applicant: string;
+  type: string;
+  tags: string[];
+  justification?: string;
+  punches?: Punch[];
+  status: string; // Nova propriedade para armazenar o status da solicitação
 }
 
-interface DetailData {
-  id: string
-  status: string
-  hours: string
-}
+const RequestTable: React.FC = () => {
+  const [data, setData] = useState<DataType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<DataType | null>(null);
 
-const data: DataType[] = [
-  {
-    key: '1',
-    date: '10/11',
-    applicant: 'Eduardo Neto',
-    type: 'Atestado',
-    tags: ['Em Aberto'],
-  },
-  {
-    key: '2',
-    date: '10/11',
-    applicant: 'Eduardo Neto',
-    type: 'Atestado',
-    tags: ['Aprovado'],
-  },
-  {
-    key: '3',
-    date: '10/11',
-    applicant: 'Eduardo Neto',
-    type: 'Atestado',
-    tags: ['Reprovado'],
-  },
-  {
-    key: '4',
-    date: '10/11',
-    applicant: 'Eduardo Neto',
-    type: 'Atestado',
-    tags: ['a'],
-  },
-]
+  // Função para buscar as solicitações do backend
+  const fetchRequests = async () => {
+    setLoading(true);
+    try {
+      const userId = localStorage.getItem('id'); // Obtém o userId do localStorage
+      if (!userId) {
+        throw new Error('User ID não encontrado no localStorage');
+      }
 
-const mockDetailData: Record<string, DetailData[]> = {
-  '10/11': [
-    { id: '1', status: 'Entrada 1 - 10/11', hours: '08:00' },
-    { id: '2', status: 'Saida 1 - 10/11', hours: '12:00' },
-    { id: '3', status: 'Entrada 2 - 10/11', hours: '13:30' },
-    { id: '4', status: 'Saida 2 - 10/11', hours: '18:00' },
-    
-  ],
-  '09/11': [
-    { id: '3', status: 'Entrada 1 - 09/11', hours: 'Saída 1 - 09/11' },
-  ],
-  '08/11': [
-    { id: '4', status: 'Entrada 1 - 08/11', hours: 'Saída 1 - 08/11' },
-    { id: '5', status: 'Entrada 2 - 08/11', hours: 'Saída 2 - 08/11' },
-  ],
-}
+      const response = await api.get(`/api/request/list/${userId}`); // Faz a requisição com o userId
+      const fetchedData = response.data.map((request: any) => ({
+        key: request.id.toString(),
+        applicant: request.user?.name || 'Desconhecido', // Verifica se o nome do usuário está presente
+        type: request.requestType,
+        tags: [request.status],
+        justification: request.justification,
+        punches: request.punches,
+        status: request.status, // Armazena o status para verificar se é reprovado
+      }));
+      setData(fetchedData); // Atualiza o estado da tabela
+    } catch (error) {
+      message.error('Erro ao buscar as solicitações');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const HistoryPointTable: React.FC = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false)
-  const [detailData, setDetailData] = useState<DetailData[]>([])
-
-  const fetchDetailData = (date: string) => {
-    const data = mockDetailData[date] || []
-    setDetailData(data)
-  }
-
-  const handleDetail = (record: DataType) => {
-    fetchDetailData(record.date)
-    setIsModalVisible(true)
-  }
+  // Chama a função de busca quando o componente for montado
+  useEffect(() => {
+    fetchRequests();
+  }, []);
 
   const getInitials = (applicant: string) => {
-    const nameParts = applicant.split(' ');
-    const initials = nameParts.map(part => part.charAt(0)).join('');
-    return initials.substring(0, 2).toUpperCase();
-};
+    if (typeof applicant === 'string') {
+      const nameParts = applicant.split(' ');
+      const initials = nameParts.map(part => part.charAt(0)).join('');
+      return initials.substring(0, 2).toUpperCase();
+    }
+    return 'NN'; // Se não for string, retorna "NN" como iniciais padrão
+  };
+
+  const showDetailModal = (record: DataType) => {
+    setSelectedRequest(record); // Armazena a solicitação selecionada
+    setIsModalVisible(true); // Exibe o modal
+  };
+
+  // Função para aprovar uma solicitação
+  const approveRequest = async () => {
+    if (!selectedRequest) return;
+
+    try {
+      await api.post(`/api/request/${selectedRequest.key}/approve`, {
+        status: 'APROVADO',
+      });
+      message.success('Solicitação aprovada com sucesso!');
+      setIsModalVisible(false);
+      fetchRequests(); // Atualiza a lista de solicitações
+    } catch (error) {
+      message.error('Erro ao aprovar a solicitação');
+    }
+  };
+
+  // Função para reprovar uma solicitação
+  const rejectRequest = async () => {
+    if (!selectedRequest) return;
+
+    try {
+      await api.post(`/api/request/${selectedRequest.key}/approve`, {
+        status: 'REPROVADO',
+      });
+      message.success('Solicitação reprovada com sucesso!');
+      setIsModalVisible(false);
+      fetchRequests(); // Atualiza a lista de solicitações
+    } catch (error) {
+      message.error('Erro ao reprovar a solicitação');
+    }
+  };
 
   const columns: ColumnsType<DataType> = [
-    {
-      title: 'Data',
-      dataIndex: 'date',
-      key: 'date',
-    },
     {
       title: 'Solicitante',
       dataIndex: 'applicant',
       key: 'applicant',
       render: (text: string) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginRight: 15 }}>
-                {getInitials(text)}
-            </Avatar>
-            {text}
+          <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginRight: 15 }}>
+            {getInitials(text)}
+          </Avatar>
+          {text}
         </div>
-    ),
+      ),
     },
     {
       title: 'Tipo',
       dataIndex: 'type',
       key: 'type',
+      render: (type: string) => {
+        const formatType = (type: string) => {
+          switch (type) {
+            case 'ADICAO_DE_PONTO':
+              return 'Adição de Ponto';
+            case 'ATESTADO':
+              return 'Atestado';
+            default:
+              return type;
+          }
+        };
+        return formatType(type);
+      },
     },
     {
       title: 'Tags',
@@ -116,18 +142,18 @@ const HistoryPointTable: React.FC = () => {
       render: (_, { tags }) => (
         <>
           {tags.map(tag => {
-            let color
-            if(tag === 'Em Aberto'){
-              color = 'blue'
-            } else if (tag === 'Aprovado'){
-              color = 'green'
-            } else if (tag === 'Reprovado'){
-              color = 'red'
+            let color;
+            if (tag === 'PENDENTE') {
+              color = 'blue';
+            } else if (tag === 'APROVADO') {
+              color = 'green';
+            } else if (tag === 'REPROVADO') {
+              color = 'red';
             } else {
-              color = 'yellow'
-              tag = 'ERRO'
+              color = 'yellow';
+              tag = 'ERRO';
             }
-            return <Tag color={color} key={tag}>{tag.toUpperCase()}</Tag>
+            return <Tag color={color} key={tag}>{tag.toUpperCase()}</Tag>;
           })}
         </>
       ),
@@ -137,39 +163,56 @@ const HistoryPointTable: React.FC = () => {
       render: (_, record) => (
         <EditDelete
           showDetail
-          onDetail={() => handleDetail(record)}
+          onDetail={() => showDetailModal(record)} // Ao clicar em "Detalhar", abre o modal
           allowDelete
           allowEdit
         />
       ),
     },
-  ]
+  ];
 
   return (
     <>
-      <Table style={{ marginTop: 10 }} columns={columns} dataSource={data} />
-      
-      <Modal
-        title="Detalhes"
-        visible={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={<Button onClick={() => setIsModalVisible(false)}>Fechar</Button>}
-      >
-        <List
-          itemLayout="horizontal"
-          dataSource={detailData}
-          renderItem={item => (
-            <List.Item>
-              <List.Item.Meta
-                title={`Status: ${item.status}`}
-                description={`Horario: ${item.hours}`}
-              />
-            </List.Item>
-          )}
-        />
-      </Modal>
-    </>
-  )
-}
+      <Table style={{ marginTop: 10 }} columns={columns} dataSource={data} loading={loading} />
 
-export default HistoryPointTable
+      {selectedRequest && (
+        <Modal
+          title="Detalhes da Solicitação"
+          visible={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={
+            selectedRequest.status === 'PENDENTE' && [
+              <Button key="reject" onClick={rejectRequest} danger>
+                Reprovar
+              </Button>,
+              <Button key="approve" type="primary" onClick={approveRequest}>
+                Aprovar
+              </Button>,
+            ]
+          }
+        >
+          <h3 style={{ color: 'black' }}>Justificativa: {selectedRequest.justification || 'Não informada'}</h3>
+
+          {selectedRequest.type === 'ADICAO_DE_PONTO' && (
+            <>
+              <h4>Pontos Inseridos</h4>
+              <List
+                dataSource={selectedRequest.punches || []}
+                renderItem={punch => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={punch.status === 'ENTRY' ? 'Entrada' : 'Saída'}
+                      description={`Horário: ${punch.hours}`}
+                    />
+                  </List.Item>
+                )}
+              />
+            </>
+          )}
+        </Modal>
+      )}
+    </>
+  );
+};
+
+export default RequestTable;
