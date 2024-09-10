@@ -49,7 +49,7 @@ export default function SignIn() {
                 setLocalStorage('id', data.id),
                 setLocalStorage('name', data.name),
                 setLocalStorage('email', data.email),
-                setLocalStorage('organizationId', data.organization_id),
+                setLocalStorage('organizationId', data.organizationId),
                 setLocalStorage('tag', data.tag)
             ]);
 

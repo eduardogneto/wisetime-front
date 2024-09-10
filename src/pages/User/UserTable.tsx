@@ -2,21 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { Avatar, Table, Tag } from 'antd';
 import api from '../../connection/api';
 
-interface Role {
-  id: number;
-  name: string;
-}
-
-interface User {
+interface UserResponseDTO { 
   id: number;
   name: string;
   email: string;
-  role: Role;
+  organizationId: number;
+  teamName: string; 
   tag: string;
 }
 
 interface UserTableProps {
-  onSelectUser: (user: User | null) => void; // Função para selecionar o usuário
+  onSelectUser: (user: UserResponseDTO | null) => void;
 }
 
 const getInitials = (applicant: string) => {
@@ -25,11 +21,11 @@ const getInitials = (applicant: string) => {
     const initials = nameParts.map(part => part.charAt(0)).join('');
     return initials.substring(0, 2).toUpperCase();
   }
-  return 'NN'; // Se não for string, retorna "NN" como iniciais padrão
+  return 'NN';
 };
 
 const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
@@ -59,7 +55,10 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
   }, [organizationId]);
 
   const columns = [
-    { title: 'Nome', dataIndex: 'name', key: 'name',
+    {
+      title: 'Nome',
+      dataIndex: 'name',
+      key: 'name',
       render: (text: string) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginRight: 15 }}>
@@ -70,7 +69,7 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
       ),
     },
     { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Cargo', dataIndex: ['role', 'name'], key: 'role' },
+    { title: 'Time', dataIndex: ['team', 'name'], key: 'team' }, 
     {
       title: 'Tag',
       dataIndex: 'tag',
@@ -92,20 +91,15 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
   ];
 
   const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: User[]) => {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: UserResponseDTO[]) => {
       setSelectedRowKeys(selectedRowKeys as number[]);
       if (selectedRows.length === 1) {
-        onSelectUser(selectedRows[0]); // Passa o único usuário selecionado
+        onSelectUser(selectedRows[0]);
       } else {
-        onSelectUser(null); // Desabilita se não houver ou houver mais de um
+        onSelectUser(null);
       }
     },
   };
-
-  const data = users.map(user => ({
-    key: user.id,
-    ...user,
-  }));
 
   if (loading) return <p>Carregando...</p>;
   if (error) return <p>{error}</p>;
@@ -115,7 +109,7 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
       pagination={false}
       scroll={{ y: 400 }}
       columns={columns}
-      dataSource={data}
+      dataSource={users}
       rowSelection={{
         type: 'checkbox',
         ...rowSelection,

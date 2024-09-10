@@ -47,23 +47,49 @@ const Dashboard: React.FC = () => {
           fetchAddress(latitude, longitude);
         },
         (err) => {
+          console.error('Erro ao obter localização:', err); // Log do erro para depuração
           setError('Erro ao obter localização. Verifique as permissões.');
+          fetchLocationByIP(); // Se o usuário negar a permissão, tenta buscar a localização pelo IP
         }
       );
     } else {
       setError('Geolocalização não é suportada pelo navegador.');
+      fetchLocationByIP(); // Tenta buscar a localização pelo IP caso a geolocalização não seja suportada
     }
   };
 
+  // Função para buscar o endereço a partir da latitude e longitude
   const fetchAddress = async (latitude: number, longitude: number) => {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
       );
       const data = await response.json();
-      setUserLocation(data.display_name); // Exibe o endereço completo retornado pela API
+      if (data.display_name) {
+        setUserLocation(data.display_name); // Exibe o endereço completo retornado pela API
+      } else {
+        throw new Error('Endereço não encontrado.');
+      }
     } catch (err) {
+      console.error('Erro ao buscar endereço:', err); // Log do erro
       setError('Erro ao buscar endereço.');
+    }
+  };
+
+  // Função para buscar localização aproximada pelo IP
+  const fetchLocationByIP = async () => {
+    try {
+      const response = await fetch(`https://ipapi.co/json/`); // Utiliza o IPAPI para obter a localização pelo IP
+      const data = await response.json();
+      if (data && data.city) {
+        const address = `${data.city}, ${data.region}, ${data.country_name}`;
+        setUserLocation(address); // Exibe a localização baseada no IP
+      } else {
+        setError('Não foi possível obter a localização pelo IP.');
+      }
+    } catch (err) {
+      console.error('Erro ao obter localização pelo IP:', err);
+      setError('Erro ao buscar a localização aproximada pelo IP.');
     }
   };
 
@@ -72,7 +98,6 @@ const Dashboard: React.FC = () => {
     fetchPunchLogs(); // Buscar registros de ponto ao carregar o componente
   }, []);
 
-  // Função para buscar registros de ponto do usuário no dia atual
   // Função para buscar registros de ponto do usuário no dia atual e ordená-los por horário
   const fetchPunchLogs = async () => {
     try {
@@ -96,7 +121,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-
   // Função para enviar a requisição de Bater Ponto
   const handlePunchClock = async () => {
     if (!userId) {
@@ -114,7 +138,7 @@ const Dashboard: React.FC = () => {
         userId,
         timestamp,
         type,
-        location: userLocation || null, // Envia a localização, pode ser null se não obtiver
+        location: userLocation, // Envia a localização, pode ser uma string padrão
       });
 
       if (response.status === 200) {
@@ -129,15 +153,6 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoading(false); // Finaliza o loading no botão
     }
-  };
-
-  const getInitials = (applicant: string) => {
-    if (typeof applicant === 'string') {
-      const nameParts = applicant.split(' ');
-      const initials = nameParts.map(part => part.charAt(0)).join('');
-      return initials.substring(0, 2).toUpperCase();
-    }
-    return 'NN'; // Se não for string, retorna "NN" como iniciais padrão
   };
 
   return (
@@ -162,7 +177,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div className='button-point'>
                 <Button type="primary" onClick={handlePunchClock} loading={loading}>
-                  <h1 style={{fontSize:40}}>Bater Ponto</h1>
+                  <h1 style={{ fontSize: 40 }}>Bater Ponto</h1>
                 </Button>
               </div>
             </div>
@@ -208,13 +223,11 @@ const Dashboard: React.FC = () => {
             {error ? (
               <p>{error}</p>
             ) : (
-              <p>{userLocation}</p> // Exibe o endereço
+              <p>{userLocation}</p> // Exibe o endereço ou uma mensagem padrão
             )}
           </div>
         </div>
       </div>
-
-
     </div>
   );
 };
