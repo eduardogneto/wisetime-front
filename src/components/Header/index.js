@@ -16,7 +16,6 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Defina a variável items dentro do componente
   const items = [
     {
       key: '1',

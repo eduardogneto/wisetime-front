@@ -209,7 +209,7 @@ const Dashboard: React.FC = () => {
                   <CheckCircleOutlined
                     style={{
                       fontSize: 23,
-                      color: log.location ? '#FF3366' : '#A9A9A9' // Se há localização, usa a cor padrão, senão usa cinza
+                      color: log.location ? '#FF3366' : '#A9A9A9' 
                     }}
                   />
                   <b>{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b>

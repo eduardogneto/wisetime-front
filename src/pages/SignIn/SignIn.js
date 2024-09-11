@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import './signin.css'; // Arquivo de estilo
-import logo from "../../assets/image1.png"; // Imagem importada
+import './signin.css'; 
+import logo from "../../assets/image1.png"; 
 import api from '../../connection/api';
-import { message } from 'antd'; // Biblioteca de mensagens (se necessário)
+import { message } from 'antd'; 
 
 export default function SignIn() {
     const [email, setEmail] = useState('');
@@ -36,31 +36,30 @@ export default function SignIn() {
     async function logIn(email, password) {
         setLoadingAuth(true);
         try {
-            const response = await api.post('/api/users/login', {
+            const response = await api.post('/auth/login', {
                 email: email,
                 password: password,
             });
-
-            const data = response.data;
-
-            // Definindo o localStorage com Promises
+    
+            const { token, user } = response.data;
+    
             await Promise.all([
-                setLocalStorage('token', data.id),
-                setLocalStorage('id', data.id),
-                setLocalStorage('name', data.name),
-                setLocalStorage('email', data.email),
-                setLocalStorage('organizationId', data.organizationId),
-                setLocalStorage('tag', data.tag)
+                setLocalStorage('token', token), // Token JWT retornado pela API
+                setLocalStorage('id', user.id),
+                setLocalStorage('name', user.name),
+                setLocalStorage('email', user.email),
+                setLocalStorage('organizationId', user.team.organizationId), // Organization ID vindo de TeamDTO
+                setLocalStorage('tag', user.tag),
+                setLocalStorage('team', JSON.stringify(user.team)) // Salvando o team como string
             ]);
-
-            message.success(`Bem-vindo de volta ${data.name}!`);
-
-            // Depois que o localStorage estiver configurado, recarrega a página
+    
+            message.success(`Bem-vindo de volta ${user.name}!`);
+    
             setTimeout(() => {
                 setLoadingAuth(false);
                 window.location.reload();
             }, 2000);
-
+    
         } catch (error) {
             setLoadingAuth(false);
             console.log(error);
@@ -71,6 +70,7 @@ export default function SignIn() {
             }
         }
     }
+    
 
     const sendEnter = (e) => {
         if (email !== '' && password !== '') {
@@ -131,4 +131,3 @@ export default function SignIn() {
         </div>
     );
 }
-
