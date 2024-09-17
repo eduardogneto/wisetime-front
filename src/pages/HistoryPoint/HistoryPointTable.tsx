@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ColumnsType } from 'antd/es/table';
 import { Table, Tag, Modal, Button, message, Input, Form, Select } from 'antd';
 import EditDelete from '../../components/EditDelete/EditDelete.tsx';
-import api from '../../connection/api'; // Supondo que você tenha configurado Axios
-import dayjs from 'dayjs'; // Substitui moment por dayjs
+import api from '../../connection/api';
+import dayjs from 'dayjs';
 
 interface DataType {
   key: string;
@@ -25,10 +25,11 @@ const { Option } = Select;
 const HistoryPointTable: React.FC = () => {
   const [data, setData] = useState<DataType[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [detailData, setDetailData] = useState<DetailData[]>([]); // Batidas existentes
-  const [addedPunches, setAddedPunches] = useState<DetailData[]>([]); // Novas batidas adicionadas
+  const [detailData, setDetailData] = useState<DetailData[]>([]);
+  const [addedPunches, setAddedPunches] = useState<DetailData[]>([]);
   const [loading, setLoading] = useState(false);
   const [justification, setJustification] = useState('');
+  const [selectedDate, setSelectedDate] = useState(''); // Estado para armazenar a data selecionada
 
   // Função para buscar histórico resumido
   const fetchHistoryData = async () => {
@@ -38,12 +39,19 @@ const HistoryPointTable: React.FC = () => {
       const response = await api.get(`/api/punch/history/summary/${userId}`);
       const fetchedData = response.data.map((item: any) => ({
         key: item.date,
-        date: item.date,
+        date: dayjs(item.date).format('DD/MM/YYYY'),
         entrys: item.entryCount,
         outs: item.exitCount,
-        tags: [item.status], // Completo ou Incompleto
+        tags: [item.status],
       }));
-      setData(fetchedData);
+
+      const sortedData = fetchedData.sort((a, b) => {
+        const dateA = dayjs(a.date, 'DD/MM/YYYY');
+        const dateB = dayjs(b.date, 'DD/MM/YYYY');
+        return dateB.unix() - dateA.unix();
+      });
+
+      setData(sortedData);
     } catch (error) {
       message.error('Erro ao buscar o histórico.');
     } finally {
@@ -56,18 +64,19 @@ const HistoryPointTable: React.FC = () => {
     setLoading(true);
     try {
       const userId = localStorage.getItem('id');
-      const response = await api.get(`/api/punch/history/${userId}/${date}`);
+      const formattedDate = dayjs(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
+      const response = await api.get(`/api/punch/history/${userId}/${formattedDate}`);
       const fetchedDetails = response.data.map((item: any) => ({
         id: item.id,
         status: item.type === 'ENTRY' ? 'Entrada' : 'Saída',
-        hours: dayjs(item.timestamp).format('HH:mm'), // Usando dayjs para formatar a hora
+        hours: dayjs(item.timestamp).format('HH:mm'),
         editable: false,
       }));
 
       setDetailData(fetchedDetails);
 
       if (response.data[0]) {
-        setJustification(response.data[0].justification || ''); // Justificativa
+        setJustification(response.data[0].justification || '');
       }
 
       setIsModalVisible(true);
@@ -82,12 +91,12 @@ const HistoryPointTable: React.FC = () => {
   const addNewPunch = () => {
     const newPunch: DetailData = {
       id: (Math.random() * 1000).toString(),
-      status: 'Entrada', // Padrão inicial como 'Entrada', o usuário pode alterar
-      hours: '', // Define o horário como vazio para o input
+      status: 'Entrada',
+      hours: '',
       editable: true,
     };
     setDetailData([...detailData, newPunch]);
-    setAddedPunches([...addedPunches, newPunch]); // Adiciona apenas a nova batida
+    setAddedPunches([...addedPunches, newPunch]);
   };
 
   // Função para atualizar os valores dos campos editáveis
@@ -97,7 +106,6 @@ const HistoryPointTable: React.FC = () => {
     );
     setDetailData(updatedData);
 
-    // Atualiza as novas batidas também, se necessário
     const updatedNewPunches = addedPunches.map((item) =>
       item.id === id ? { ...item, [field]: value } : item
     );
@@ -118,24 +126,25 @@ const HistoryPointTable: React.FC = () => {
 
       const id = localStorage.getItem('id');
 
+      // Convertendo a data selecionada para o formato 'YYYY-MM-DD'
+      const date = dayjs(selectedDate, 'DD/MM/YYYY').format('YYYY-MM-DD');
+
       const requestPayload = {
         id,
-        requestType: 'ADICAO_DE_PONTO', // Tipo de requisição
-        justification,                  // Justificativa do usuário
+        requestType: 'ADICAO_DE_PONTO',
+        justification,
         punches: addedPunches.map(punch => {
-          // Aqui pegamos o valor do input de horas e concatenamos com a data
-          const today = dayjs().format('YYYY-MM-DD'); // Data de hoje
-          const fullDateTime = `${today}T${punch.hours}:00`; // Formato final para envio
-          
+          const fullDateTime = `${date}T${punch.hours}:00`;
+
           return {
             status: punch.status,
-            hours: fullDateTime, // Simplesmente pegamos o valor do input e concatenamos
+            hours: fullDateTime,
           };
         }),
       };
 
       // Verifica se alguma data é inválida
-      const hasEmptyTime = requestPayload.punches.some(punch => punch.hours === 'T:00');
+      const hasEmptyTime = requestPayload.punches.some(punch => punch.hours === `${date}T:00`);
       if (hasEmptyTime) {
         message.error('Há horários vazios. Por favor, preencha antes de enviar.');
         return;
@@ -146,7 +155,8 @@ const HistoryPointTable: React.FC = () => {
 
       message.success('Solicitação enviada ao coordenador.');
       setIsModalVisible(false);
-      setAddedPunches([]); // Limpa as batidas adicionadas após envio
+      setAddedPunches([]);
+      setJustification('');
     } catch (error) {
       message.error('Erro ao enviar a solicitação.');
     }
@@ -157,7 +167,8 @@ const HistoryPointTable: React.FC = () => {
   }, []);
 
   const handleDetail = (record: DataType) => {
-    fetchPunchDetails(record.date); // Busca os detalhes do dia selecionado
+    setSelectedDate(record.date); // Armazenando a data selecionada
+    fetchPunchDetails(record.date);
   };
 
   // Colunas para a tabela de histórico de pontos
@@ -238,7 +249,7 @@ const HistoryPointTable: React.FC = () => {
         record.editable ? (
           <Input
             value={record.hours}
-            onChange={(e) => updatePunch(record.id, 'hours', e.target.value)} // Permite a digitação
+            onChange={(e) => updatePunch(record.id, 'hours', e.target.value)}
             placeholder="HH:mm"
           />
         ) : (
