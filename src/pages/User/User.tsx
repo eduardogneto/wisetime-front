@@ -6,44 +6,44 @@ import { SearchOutlined } from '@ant-design/icons';
 import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
 import UserTable from './UserTable.tsx';
 import { TopButtons } from '../../components/TopButtons/TopButtons.tsx';
-import api from '../../connection/api'; // Supondo que já tenha a configuração do axios
+import api from '../../connection/api';
 
-interface Role {
+interface Team {
   id: number;
   name: string;
 }
 
 const User: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [loadingRoles, setLoadingRoles] = useState(true);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loadingTeams, setloadingTeams] = useState(true);
 
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [roleId, setRoleId] = useState<number | null>(null);
+  const [teamId, setTeamId] = useState<number | null>(null);
   const [tag, setTag] = useState('');
-  const [selectedUser, setSelectedUser] = useState<any>(null); // Controle de usuário selecionado
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const organizationId = localStorage.getItem('organizationId');
 
   useEffect(() => {
-    const fetchRoles = async () => {
+    const fetchTeams = async () => {
       try {
-        setLoadingRoles(true);
-        const response = await api.get('/api/users/roles', {
+        setloadingTeams(true);
+        const response = await api.get('/api/users/teams', {
           params: { organizationId },
         });
-        setRoles(response.data);
+        setTeams(response.data);
       } catch (error) {
         console.error('Erro ao buscar cargos:', error);
       } finally {
-        setLoadingRoles(false);
+        setloadingTeams(false);
       }
     };
 
     if (organizationId) {
-      fetchRoles();
+      fetchTeams();
     }
   }, [organizationId]);
 
@@ -51,29 +51,29 @@ const User: React.FC = () => {
     if (selectedUser) {
       setName(selectedUser.name);
       setEmail(selectedUser.email);
-      setRoleId(selectedUser.role.id);
+      setTeamId(selectedUser.team?.id || null);  
       setTag(selectedUser.tag);
     }
     setIsModalOpen(true);
   };
 
   const handleOk = async () => {
-    if (!email || !name || !password || !roleId || !tag) {
+    if (!email || !name || !password || !teamId || !tag) {
       message.error('Por favor, preencha todos os campos!');
       return;
     }
 
     const userData = {
-      id: selectedUser?.id || null, // Inclui o ID caso seja uma edição
+      id: selectedUser?.id || null,
       email,
       name,
       password,
-      roleId,
+      teamId,
       tag,
     };
 
     try {
-      await api.post('/api/users/register', userData); // Usando a rota '/register' para criação e edição
+      await api.post('/api/users/register', userData);
       message.success(selectedUser?.id ? 'Usuário editado com sucesso!' : 'Usuário registrado com sucesso!');
       setIsModalOpen(false);
       resetFormFields();
@@ -86,9 +86,9 @@ const User: React.FC = () => {
     setEmail('');
     setName('');
     setPassword('');
-    setRoleId(null);
+    setTeamId(null);
     setTag('');
-    setSelectedUser(null); // Limpa o usuário selecionado após a operação
+    setSelectedUser(null);
   };
 
   const handleCancel = () => {
@@ -122,7 +122,7 @@ const User: React.FC = () => {
               <TopButtons
                 handleEdit={showModal}
                 handleDelete={showModal}
-                isEditable={!!selectedUser} // Habilita "Editar" somente com um selecionado
+                isEditable={!!selectedUser}
                 isDeletable
               />
               <div className='button-history'>
@@ -156,10 +156,10 @@ const User: React.FC = () => {
               <h4>Cargo</h4>
               <Select
                 placeholder="Selecione o cargo"
-                loading={loadingRoles}
-                value={roleId}
-                onChange={(value) => setRoleId(value)}
-                options={roles.map(role => ({ value: role.id, label: role.name }))}
+                loading={loadingTeams}
+                value={teamId}
+                onChange={(value) => setTeamId(value)}
+                options={teams.map(team => ({ value: team.id, label: team.name }))}
               />
             </div>
             <div className='input-modal'>

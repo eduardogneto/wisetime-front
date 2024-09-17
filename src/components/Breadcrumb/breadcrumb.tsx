@@ -15,6 +15,7 @@ const BreadcrumbComponent: React.FC = () => {
         historypoint: 'Histórico de Ponto',
         duedatebank: 'Vencimento de Banco',
         requests: 'Solicitações',
+        organization: 'Times e Organizações',
         // Adicione outros mapeamentos conforme necessário
     };
 

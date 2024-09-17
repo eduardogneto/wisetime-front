@@ -16,7 +16,6 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Defina a variável items dentro do componente
   const items = [
     {
       key: '1',
@@ -57,8 +56,8 @@ export default function Header() {
         },
         {
           key: '7',
-          label: 'Cargos e Organizações',
-          path: '/management/positions'
+          label: 'Times e Organizações',
+          path: '/management/organization'
         },
         {
           key: '8',
@@ -103,6 +102,7 @@ export default function Header() {
       '3': () => navigate('/management/users'),
       '4': () => navigate('/management/duedatebank'),
       '5': () => navigate('/management/requests'),
+      '7': () => navigate('/management/organization'),
       '9': handleExit,
     };
 
