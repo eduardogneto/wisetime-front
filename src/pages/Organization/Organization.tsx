@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './style.sass';
-import { Input, Modal, Button, Form, Table, Space, DatePicker, Select, Row, Col, message } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Input, Modal, Button, Form, Table, Space, Row, Col, message } from 'antd';
+import { PlusOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
 import Header from '../../components/Header/index.js';
 import OrganizationTable from './OrganizationTable.tsx';
-import { SearchOutlined } from '@ant-design/icons';
 import { TopButtons } from '../../components/TopButtons/TopButtons.tsx';
 import api from '../../connection/api';
-
-const { Option } = Select;
 
 interface TeamData {
   key: string;
@@ -17,21 +14,36 @@ interface TeamData {
   description: string;
 }
 
+interface OrganizationData {
+  id: number;
+  name: string;
+  taxId: string;
+  email: string;
+  phone: string;
+  address: any;
+  teams: TeamData[];
+}
+
 const Organization: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [teams, setTeams] = useState<TeamData[]>([]);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const showModal = () => {
     form.resetFields();
     setTeams([]);
     setIsModalOpen(true);
+    setIsEditMode(false);
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
     form.resetFields();
     setTeams([]);
+    setIsEditMode(false);
+    setSelectedOrganizationId(null);
   };
 
   const handleAddTeam = () => {
@@ -55,36 +67,78 @@ const Organization: React.FC = () => {
 
   const handleSubmit = () => {
     form
-        .validateFields()
-        .then(async (values) => {
-            const organizationData = {
-                name: values.name,
-                taxId: values.taxId,
-                email: values.email,
-                phone: values.phone,
-                address: values.address,
-                teams: teams.map((team) => ({
-                    name: team.name,
-                    description: team.description,
-                })),
-            };
+      .validateFields()
+      .then(async (values) => {
+        const organizationData = {
+          name: values.name,
+          taxId: values.taxId,
+          email: values.email,
+          phone: values.phone,
+          address: values.address,
+          teams: teams.map((team) => ({
+            name: team.name,
+            description: team.description,
+          })),
+        };
 
-            try {
-                await api.post('/api/organizations/organizations', organizationData);
-                message.success('Organização criada com sucesso!');
-                setIsModalOpen(false);
-                form.resetFields();
-                setTeams([]);
-            } catch (error) {
-                message.error('Erro ao criar organização');
-            }
-        })
-        .catch((errorInfo) => {
-            console.log('Erro na validação:', errorInfo);
-        });
-};
+        try {
+          if (isEditMode && selectedOrganizationId) {
+            // Atualizar organização
+            await api.put(`/api/organizations/${selectedOrganizationId}`, organizationData);
+            message.success('Organização atualizada com sucesso!');
+          } else {
+            // Criar nova organização
+            await api.post('/api/organizations/organizations', organizationData);
+            message.success('Organização criada com sucesso!');
+          }
+          setIsModalOpen(false);
+          form.resetFields();
+          setTeams([]);
+        } catch (error) {
+          message.error('Erro ao salvar organização');
+        }
+      })
+      .catch((errorInfo) => {
+        console.log('Erro na validação:', errorInfo);
+      });
+  };
 
+  // Função para lidar com a edição
+  const handleEdit = async () => {
+    if (selectedOrganizationId === null) {
+      message.warning('Por favor, selecione uma organização para editar.');
+      return;
+    }
 
+    try {
+      // Buscar dados completos da organização
+      const response = await api.get(`/api/organizations/${selectedOrganizationId}`);
+      const orgData = response.data;
+
+      form.setFieldsValue({
+        name: orgData.name,
+        taxId: orgData.taxId,
+        email: orgData.email,
+        phone: orgData.phone,
+        address: orgData.address,
+      });
+
+      // Definir times com chaves únicas
+      const teamsWithKeys = orgData.teams.map((team: any, index: number) => ({
+        key: `${Date.now()}-${index}`,
+        name: team.name,
+        description: team.description,
+      }));
+
+      setTeams(teamsWithKeys);
+      setIsEditMode(true);
+      setIsModalOpen(true);
+    } catch (error) {
+      message.error('Erro ao carregar dados da organização');
+    }
+  };
+
+  // Definição de teamColumns (faltante anteriormente)
   const teamColumns = [
     {
       title: 'Nome do Time',
@@ -105,9 +159,7 @@ const Organization: React.FC = () => {
       render: (text: string, record: TeamData) => (
         <Input
           value={text}
-          onChange={(e) =>
-            handleTeamChange(record.key, 'description', e.target.value)
-          }
+          onChange={(e) => handleTeamChange(record.key, 'description', e.target.value)}
           placeholder="Descrição"
         />
       ),
@@ -149,7 +201,11 @@ const Organization: React.FC = () => {
               />
             </div>
             <div className="right-filters">
-              <TopButtons isDeletable />
+              <TopButtons
+                handleEdit={handleEdit}
+                isEditable={selectedOrganizationId !== null}
+                isDeletable={selectedOrganizationId !== null}
+              />
               <div className="button-history">
                 <button type="submit" onClick={showModal} style={{ marginLeft: 15 }}>
                   <p>Cadastrar</p>
@@ -157,22 +213,24 @@ const Organization: React.FC = () => {
               </div>
             </div>
           </div>
-          <OrganizationTable />
+          <OrganizationTable
+            setSelectedOrganizationId={setSelectedOrganizationId}
+          />
         </div>
       </div>
 
-      {/* Modal para cadastro da organização */}
+      {/* Modal para cadastro/edição da organização */}
       <Modal
-        title="Cadastrar Organização"
+        title={isEditMode ? 'Editar Organização' : 'Cadastrar Organização'}
         visible={isModalOpen}
         onCancel={handleCancel}
         width={800}
         footer={[
-          <Button key="cancel" onClick={handleCancel}>
+          <Button danger key="cancel" onClick={handleCancel}>
             Cancelar
           </Button>,
           <Button key="submit" type="primary" onClick={handleSubmit}>
-            Salvar
+            {isEditMode ? 'Atualizar' : 'Salvar'}
           </Button>,
         ]}
         bodyStyle={{ maxHeight: '70vh', overflowX: 'hidden', overflowY: 'auto' }}

@@ -1,0 +1,117 @@
+// Variáveis para cores do tema dark
+$background-color: #1e1e1e
+$input-bg-color: #2b2b2b
+$input-text-color: #fff
+$border-color-gray: #555
+$button-color: #FF426B
+$border-color: #FF426B
+$button-hover-color: lighten($button-color, 10%)
+$table-header-bg: #2e3b4e
+$table-row-bg: #192731
+$table-text-color: #fff
+
+// Estilos para o modal com tema dark
+.ant-modal
+  background-color: $background-color
+  .ant-modal-content
+    background-color: $background-color
+    color: $input-text-color
+
+  .ant-modal-header
+    background-color: $background-color
+    color: $input-text-color
+
+  .ant-modal-title
+    color: $input-text-color
+
+  .ant-modal-footer
+    background-color: $background-color
+    button
+      background-color: $button-color
+      color: $input-text-color
+      border: none
+
+      &:hover
+        background-color: $button-hover-color
+
+// Estilos para os inputs
+.ant-input
+  background-color: $input-bg-color
+  color: $input-text-color
+  border: 1px solid $border-color-gray
+
+  &::placeholder
+    color: #7c7c7c
+
+  &:hover
+    background-color: lighten($input-bg-color, 10%)
+    border-color: $border-color
+
+  &:focus
+    background-color: $input-bg-color
+    border-color: $border-color
+    color: $input-text-color
+
+  &:active
+    background-color: $input-bg-color
+    border-color: $border-color
+    color: $input-text-color
+
+  &:blur
+    background-color: $input-bg-color
+    border-color: $border-color
+    color: $input-text-color !important
+
+  &:-webkit-autofill
+    background-color: $input-bg-color !important
+    color: $input-text-color !important
+    -webkit-text-fill-color: $input-text-color !important
+    -webkit-box-shadow: 0 0 0px 1000px $input-bg-color inset !important
+    transition: background-color 5000s ease-in-out 0s !important
+
+  &:-webkit-autofill:hover
+    background-color: $input-bg-color !important
+    color: $input-text-color !important
+
+  &:-webkit-autofill:focus
+    background-color: $input-bg-color !important
+    color: $input-text-color !important
+
+  &:-webkit-autofill:active
+    background-color: $input-bg-color !important
+    color: $input-text-color !important
+
+// Estilos para os botões
+button
+  background-color: $button-color
+  color: $input-text-color
+
+  &:hover
+    background-color: $button-hover-color
+
+// Estilos específicos para botões de tipo "dashed"
+.ant-btn-dashed
+  background-color: $background-color !important
+  border-color: $border-color-gray !important
+  color: $input-text-color !important
+
+  &:hover
+    background-color: lighten($background-color, 5%) !important
+    border-color: $border-color !important
+    color: $input-text-color !important
+    
+label
+    color: white !important
+
+// Estilos para a tabela
+.ant-table
+  .ant-table-thead > tr > th
+    background-color: $table-header-bg
+    color: $input-text-color
+
+  .ant-table-tbody > tr > td
+    background-color: $table-row-bg
+    color: $table-text-color
+
+  .ant-empty-description
+    color: $table-text-color
