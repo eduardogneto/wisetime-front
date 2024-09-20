@@ -102,6 +102,7 @@ export default function Header() {
       '3': () => navigate('/management/users'),
       '4': () => navigate('/management/duedatebank'),
       '5': () => navigate('/management/requests'),
+      '6': () => navigate('/management/reports'),
       '7': () => navigate('/management/organization'),
       '9': handleExit,
     };

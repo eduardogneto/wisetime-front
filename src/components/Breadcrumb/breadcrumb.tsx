@@ -16,6 +16,7 @@ const BreadcrumbComponent: React.FC = () => {
         duedatebank: 'Vencimento de Banco',
         requests: 'Solicitações',
         organization: 'Times e Organizações',
+        reports: 'Relatórios',
         // Adicione outros mapeamentos conforme necessário
     };
 

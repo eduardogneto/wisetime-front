@@ -7,6 +7,8 @@ import HistoryPoint from '../pages/HistoryPoint/HistoryPoint.tsx';
 import DueDateBank from '../pages/DueDateBank/DueDateBank.tsx';
 import Requests from '../pages/Requests/Requests.tsx';
 import Organization from '../pages/Organization/Organization.tsx';
+import Reports from '../pages/Reports/Reports.tsx';
+import ErrorPage from '../pages/ErrorPage.tsx';
 
 const ApplicationRoutes = () => {
     const [signed, setSigned] = useState(false);
@@ -35,8 +37,9 @@ const ApplicationRoutes = () => {
                 <Route path='/management/duedatebank' element={<PrivateRoute><DueDateBank /></PrivateRoute>} />
                 <Route path='/management/requests' element={<PrivateRoute><Requests /></PrivateRoute>} />
                 <Route path='/management/organization' element={<PrivateRoute><Organization /></PrivateRoute>} />
+                <Route path='/management/reports' element={<PrivateRoute><Reports /></PrivateRoute>} />
                 <Route path='/login' element={<PublicRoute><SignIn /></PublicRoute>} />
-                <Route path='*' element={'ERRO 404 - REQUEST NAO RECONHECIDA'} />
+                <Route path='*' element={<ErrorPage/>} />
             </Routes>
         </BrowserRouter>
     </>
