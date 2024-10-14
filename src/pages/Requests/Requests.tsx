@@ -11,7 +11,6 @@ interface ItemProps {
   value: string;
 }
 
-// Opções separadas por categorias
 const options: SelectProps['options'] = [
   {
     label: 'Tipos',
@@ -41,7 +40,7 @@ const sharedProps: SelectProps = {
 };
 
 const Requests: React.FC = () => {
-  const [value, setValue] = useState<string[]>([]); // Inicializa vazio
+  const [value, setValue] = useState<string[]>([]); 
   const [counts, setCounts] = useState({ pendente: 0, aprovado: 0, reprovado: 0 });
 
   const selectProps: SelectProps = {
@@ -49,11 +48,18 @@ const Requests: React.FC = () => {
     onChange: setValue,
   };
 
-  // Função para buscar contadores de solicitações
   const fetchRequestCounts = async () => {
     try {
-      const organizationId = localStorage.getItem('organizationId');
-      const response = await api.get(`/api/request/countByStatus/${organizationId}`);
+      const teamString = localStorage.getItem('team');
+      if (teamString) {
+        try {
+            const team = JSON.parse(teamString);
+            var teamId = team.id;
+        } catch (error) {
+            console.error('Erro ao analisar o JSON:', error);
+        }
+      }
+      const response = await api.get(`/api/request/countByStatus/${teamId}`);
       setCounts(response.data);
     } catch (error) {
       console.error("Erro ao buscar contadores de solicitações", error);
@@ -114,7 +120,7 @@ const Requests: React.FC = () => {
             </div>
           </div>
 
-          <RequestsTable filters={value} /> {/* Passando os filtros selecionados */}
+          <RequestsTable filters={value} onActionCompleted={fetchRequestCounts} /> 
         </div>
       </div>
     </div>

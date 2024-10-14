@@ -14,7 +14,7 @@ interface Organization {
 
 interface TeamData {
     key: string;
-    id?: number; // ID opcional para times existentes
+    id?: number; 
     name: string;
     description: string;
 }
@@ -31,7 +31,6 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
     const [teams, setTeams] = useState<TeamData[]>([]);
     const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
 
-    // Função para buscar organizações do backend
     const fetchOrganizations = async () => {
         setLoading(true);
         try {
@@ -40,7 +39,7 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
                 key: org.id.toString(),
                 id: org.id,
                 name: org.name,
-                teamCount: org.teams ? org.teams.length : 0, // Conta o número de times
+                teamCount: org.teams ? org.teams.length : 0, 
                 createdAt: dayjs(org.createdAt).format('DD/MM/YYYY'),
             }));
             setData(fetchedData);
@@ -55,13 +54,12 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
         fetchOrganizations();
     }, []);
 
-    // Função para buscar times da organização selecionada e abrir o modal
     const handleAddTeam = async (organizationId: string) => {
         try {
             const response = await api.get(`/api/organizations/${organizationId}/teams`);
             const fetchedTeams = response.data.map((team: any) => ({
                 key: team.id.toString(),
-                id: team.id, // Inclui o ID existente
+                id: team.id, 
                 name: team.name,
                 description: team.description,
             }));
@@ -86,7 +84,6 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
             key: `${Date.now()}`,
             name: '',
             description: '',
-            // Sem ID, pois será criado no backend
         };
         setTeams([...teams, newTeam]);
     };
@@ -101,11 +98,9 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
         );
     };
 
-    // Função para salvar os times
     const handleSave = async () => {
         if (!selectedOrganization) return;
 
-        // Validação básica para garantir que todos os nomes dos times estão preenchidos
         for (let team of teams) {
             if (!team.name) {
                 message.error('O nome do time é obrigatório!');
@@ -114,12 +109,11 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
         }
 
         try {
-            // Envia os times atualizados para o novo endpoint
             await api.put(`/api/organizations/${selectedOrganization.id}/teams`, teams);
 
             message.success('Times salvos com sucesso!');
-            fetchOrganizations(); // Atualiza a tabela de organizações
-            handleCancel(); // Fecha o modal após salvar
+            fetchOrganizations(); 
+            handleCancel(); 
         } catch (error) {
             if(error.response.data == 'Erro ao atualizar times'){
                 message.error('Você não pode retirar um time que já está vinculado a um usuário.');
@@ -129,7 +123,6 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
         }
     };
 
-    // Função chamada quando as linhas selecionadas mudam
     const onSelectChange = (selectedRowKeys: React.Key[]) => {
         setSelectedRowKeys(selectedRowKeys);
         if (selectedRowKeys.length > 0) {
@@ -213,6 +206,8 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
     return (
         <>
             <Table
+                className='tables-wise'
+                pagination={false}
                 columns={columns}
                 dataSource={data}
                 loading={loading}
@@ -220,14 +215,13 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
                     selectedRowKeys,
                     onChange: onSelectChange,
                 }}
-                style={{ marginTop: 20 }}
             />
 
             <Modal
                 title={`Times da Organização: ${selectedOrganization?.name}`}
                 visible={isModalOpen}
                 onCancel={handleCancel}
-                width={800} // Largura fixa
+                width={800} 
                 footer={[
                     <Button key="cancel" onClick={handleCancel}>
                         Cancelar
@@ -237,8 +231,8 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
                     </Button>,
                 ]}
                 bodyStyle={{
-                    maxHeight: '500px', // Altura máxima da modal
-                    overflowY: 'hidden', // Evita barra de rolagem na modal
+                    maxHeight: '500px', 
+                    overflowY: 'hidden', 
                 }}
             >
                 <Button
@@ -252,11 +246,12 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({ setSelectedOrgani
 
                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                     <Table
+                        className='tables-wise'
                         columns={teamColumns}
                         dataSource={teams}
                         pagination={false}
                         rowKey="key"
-                        scroll={{ y: 300 }} // Define a altura da tabela para rolar internamente
+                        scroll={{ y: 300 }} 
                     />
                 </div>
             </Modal>

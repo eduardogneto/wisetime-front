@@ -1,39 +1,39 @@
 .topBar {
     display: flex;
-    justify-content: space-between; /* Espaça os elementos nas extremidades */
-    align-items: center; /* Centraliza verticalmente os elementos */
+    justify-content: space-between; 
+    align-items: center;
     margin: 0;
-    padding: 0 20px; /* Adiciona um pouco de espaço nas laterais */
+    padding: 0 20px; 
     top: 0;
     left: 0;
     width: 100%;
     z-index: 999;
     background-color: rgb(17, 19, 29);
     position: fixed;
-    height: 60px; /* Definindo uma altura fixa */
-    box-sizing: border-box; /* Inclui padding e border no cálculo de altura */
+    height: 60px; 
+    box-sizing: border-box; 
 }
 
 .leftbar, .rightbar {
     display: flex;
-    align-items: center; /* Centraliza verticalmente os elementos dentro das barras */
+    align-items: center; 
 }
 
 .leftbar h1, .rightbar p {
     margin: 0;
-    padding-left: 10px; /* Espaço entre o ícone e o texto */
-    color: white; /* Certifica-se de que o texto seja branco para melhor visibilidade */
+    padding-left: 10px; 
+    color: white; 
 }
 
 .leftbar h1 {
-    font-size: 20px; /* Tamanho da fonte igual ao tamanho do ícone */
-    margin-left: 10px; /* Espaço entre o ícone e o texto */
-    color: white; /* Cor do texto */
-    display: inline; /* Para garantir que o texto fique ao lado do ícone */
+    font-size: 20px; 
+    margin-left: 10px; 
+    color: white; 
+    display: inline; 
 }
 
 .pink {
-    color: #FF3366; /* Cor rosa */
+    color: #FF3366; 
 }
 
 .sidebar {

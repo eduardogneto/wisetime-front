@@ -3,19 +3,19 @@ import Header from '../../components/Header';
 import './style.sass';
 import { EnvironmentOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { Button, message } from 'antd';
-import api from '../../connection/api'; // Supondo que você tenha configurado o Axios
+import api from '../../connection/api'; 
+import dayjs from 'dayjs';
 
 const name = localStorage.getItem('name');
-const userId = localStorage.getItem('id'); // Pega o userId do localStorage
+const userId = localStorage.getItem('id'); 
 
 const Dashboard: React.FC = () => {
   const [currentDateTime, setCurrentDateTime] = useState('');
   const [userLocation, setUserLocation] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Estado de loading para o botão
-  const [punchLogs, setPunchLogs] = useState([]); // Armazena os registros de ponto
+  const [loading, setLoading] = useState(false); 
+  const [punchLogs, setPunchLogs] = useState([]);
 
-  // Função para formatar data e hora
   const formatDate = (date: Date) => {
     const day = date.getDate();
     const month = date.toLocaleString('pt-BR', { month: 'long' });
@@ -25,7 +25,6 @@ const Dashboard: React.FC = () => {
     return `${day} de ${month.charAt(0).toUpperCase() + month.slice(1)}, ${hours}h${minutes}min`;
   };
 
-  // Atualiza data e hora
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
@@ -38,7 +37,6 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Função para pegar localização do usuário
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -47,18 +45,17 @@ const Dashboard: React.FC = () => {
           fetchAddress(latitude, longitude);
         },
         (err) => {
-          console.error('Erro ao obter localização:', err); // Log do erro para depuração
+          console.error('Erro ao obter localização:', err); 
           setError('Erro ao obter localização. Verifique as permissões.');
-          fetchLocationByIP(); // Se o usuário negar a permissão, tenta buscar a localização pelo IP
+          fetchLocationByIP(); 
         }
       );
     } else {
       setError('Geolocalização não é suportada pelo navegador.');
-      fetchLocationByIP(); // Tenta buscar a localização pelo IP caso a geolocalização não seja suportada
+      fetchLocationByIP(); 
     }
   };
 
-  // Função para buscar o endereço a partir da latitude e longitude
   const fetchAddress = async (latitude: number, longitude: number) => {
     try {
       const response = await fetch(
@@ -66,24 +63,23 @@ const Dashboard: React.FC = () => {
       );
       const data = await response.json();
       if (data.display_name) {
-        setUserLocation(data.display_name); // Exibe o endereço completo retornado pela API
+        setUserLocation(data.display_name); 
       } else {
         throw new Error('Endereço não encontrado.');
       }
     } catch (err) {
-      console.error('Erro ao buscar endereço:', err); // Log do erro
+      console.error('Erro ao buscar endereço:', err); 
       setError('Erro ao buscar endereço.');
     }
   };
 
-  // Função para buscar localização aproximada pelo IP
   const fetchLocationByIP = async () => {
     try {
-      const response = await fetch(`https://ipapi.co/json/`); // Utiliza o IPAPI para obter a localização pelo IP
+      const response = await fetch(`https://ipapi.co/json/`); 
       const data = await response.json();
       if (data && data.city) {
         const address = `${data.city}, ${data.region}, ${data.country_name}`;
-        setUserLocation(address); // Exibe a localização baseada no IP
+        setUserLocation(address); 
       } else {
         setError('Não foi possível obter a localização pelo IP.');
       }
@@ -95,21 +91,19 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     getUserLocation();
-    fetchPunchLogs(); // Buscar registros de ponto ao carregar o componente
+    fetchPunchLogs(); 
   }, []);
 
-  // Função para buscar registros de ponto do usuário no dia atual e ordená-los por horário
   const fetchPunchLogs = async () => {
     try {
       const response = await api.get(`/api/punch/history/${userId}/${new Date().toISOString().split('T')[0]}`);
       if (response.status === 200) {
-        // Ordena os registros de ponto pelo horário (timestamp)
         const sortedLogs = response.data.sort((a: any, b: any) => {
           const timeA = new Date(a.timestamp).getTime();
           const timeB = new Date(b.timestamp).getTime();
-          return timeA - timeB; // Ordena em ordem crescente
+          return timeA - timeB; 
         });
-        setPunchLogs(sortedLogs); // Salva os registros de ponto ordenados na variável de estado
+        setPunchLogs(sortedLogs); 
       } else {
         setPunchLogs([]);
         message.error('Falha ao buscar os registros de ponto.');
@@ -121,29 +115,30 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Função para enviar a requisição de Bater Ponto
   const handlePunchClock = async () => {
+    const userId = localStorage.getItem('id'); 
+  
     if (!userId) {
       message.error('Usuário não encontrado.');
       return;
     }
-
-    const timestamp = new Date().toISOString(); // Pega o horário atual no formato ISO
-    const type = 'ENTRY'; // Aqui você pode mudar para ENTRY ou EXIT baseado na lógica de entrada e saída
-
-    setLoading(true); // Inicia o loading no botão
-
+  
+    const timestamp = dayjs().subtract(3, 'hour').toISOString();
+    const type = 'ENTRY'; 
+  
+    setLoading(true); 
+  
     try {
       const response = await api.post('/api/punch/log', {
         userId,
         timestamp,
         type,
-        location: userLocation, // Envia a localização, pode ser uma string padrão
+        location: userLocation, 
       });
-
+  
       if (response.status === 200) {
         message.success('Batida de ponto registrada com sucesso!');
-        fetchPunchLogs(); // Atualiza a lista de batidas após o registro
+        fetchPunchLogs(); 
       } else {
         message.error('Falha ao registrar a batida de ponto.');
       }
@@ -151,9 +146,50 @@ const Dashboard: React.FC = () => {
       console.error('Erro ao registrar ponto:', error);
       message.error('Erro ao registrar a batida de ponto.');
     } finally {
-      setLoading(false); // Finaliza o loading no botão
+      setLoading(false); 
     }
   };
+
+  const formatBalance = (balance: string) => {
+    const symbol = balance.substring(0, 1); 
+    const time = balance.substring(1); 
+    const [hours, minutes] = time.split(':'); 
+    const formattedTime = `${hours}h${minutes}min`; 
+    return { symbol, formattedTime };
+  };
+
+  const [balances, setBalances] = useState({
+    currentPeriodBalance: '+00:00',
+    previousPeriodBalance: '+00:00',
+    totalBalance: '+00:00',
+  });
+
+  const fetchBalances = async () => {
+    setLoading(true);
+    try {
+      let userId = localStorage.getItem('id');
+      let organizationId = localStorage.getItem('organizationId');
+
+      if (!userId || !organizationId) {
+        throw new Error('Usuário ou organização não encontrados.');
+      }
+
+      const response = await api.get(`/api/users/${userId}/balances`, {
+        params: { organizationId },
+      });
+
+      setBalances(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar os saldos:', error);
+      message.error('Erro ao buscar os saldos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBalances();
+  }, []);
 
   return (
     <div>
@@ -185,13 +221,33 @@ const Dashboard: React.FC = () => {
               <div className='container-hours'>
                 <p className='top-balace'>Saldo Período</p>
                 <p className='low-balace'>
-                  <span className='pink'>+ </span><span>04h32min</span>
+                  {
+                    (() => {
+                      const { symbol, formattedTime } = formatBalance(balances.currentPeriodBalance);
+                      return (
+                        <>
+                          <span className='pink'>{symbol}</span>
+                          <span>{formattedTime}</span>
+                        </>
+                      );
+                    })()
+                  }
                 </p>
               </div>
               <div className='container-map'>
                 <p className='top-balace'>Saldo Geral</p>
                 <p className='low-balace'>
-                  <span className='pink'>+ </span><span>14h32min</span>
+                  {
+                    (() => {
+                      const { symbol, formattedTime } = formatBalance(balances.totalBalance);
+                      return (
+                        <>
+                          <span className='pink'>{symbol}</span>
+                          <span>{formattedTime}</span>
+                        </>
+                      );
+                    })()
+                  }
                 </p>
               </div>
             </div>
@@ -209,7 +265,7 @@ const Dashboard: React.FC = () => {
                   <CheckCircleOutlined
                     style={{
                       fontSize: 23,
-                      color: log.location ? '#FF3366' : '#A9A9A9' 
+                      color: log.location ? '#FF3366' : '#A9A9A9'
                     }}
                   />
                   <b>{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b>
@@ -223,7 +279,7 @@ const Dashboard: React.FC = () => {
             {error ? (
               <p>{error}</p>
             ) : (
-              <p>{userLocation}</p> // Exibe o endereço ou uma mensagem padrão
+              <p>{userLocation}</p> 
             )}
           </div>
         </div>

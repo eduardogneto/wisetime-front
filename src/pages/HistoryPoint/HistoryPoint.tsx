@@ -1,69 +1,117 @@
-import React from 'react';
-import './style.sass';
-import { Button, Select, Table, Tag } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Select, message } from 'antd';
 import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
 import Header from '../../components/Header';
-import EditDelete from '../../components/EditDelete/EditDelete.tsx';
-import { ColumnsType } from 'antd/es/table/InternalTable';
 import HistoryPointTable from './HistoryPointTable.tsx';
 import { TopButtons } from '../../components/TopButtons/TopButtons.tsx';
+import api from '../../connection/api';
+import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween'; 
+
+dayjs.extend(isBetween); 
+
+const { Option } = Select;
+
+interface Period {
+  id: number;
+  startDate: string; 
+  endDate: string; 
+}
 
 const HistoryPoint: React.FC = () => {
-    const handleChange = (value: string) => {
-        console.log(`selected ${value}`);
-    };
+  const [periods, setPeriods] = useState<Period[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<{ start: string; end: string }>({
+    start: '',
+    end: '',
+  });
+  const [defaultValue, setDefaultValue] = useState<string | undefined>(undefined);
 
+  const getPeriodStatus = (startDate: string, endDate: string): string => {
+    const today = dayjs();
+    const start = dayjs(startDate);
+    const end = dayjs(endDate);
 
+    if (today.isBetween(start, end, 'day', '[]')) {
+      return ' - Atual';
+    } else if (today.isAfter(end)) {
+      return ' - Fechado';
+    } else {
+      return '';
+    }
+  };
 
-    return (
-        <div>
-            <Header />
-            <div className='container-user'>
-                <div className='table'>
-                    <Breadcrumb />
-                    <div className='containers-balance'>
-                        <div className='balance-point'>
-                            <p className='top-point-balace'>Saldo Anterior</p>
-                            <p className='low-point-balace'>
-                                <span className='pink'>- </span><span>01h23min</span>
-                            </p>
-                        </div>
-                        <div className='balance-point'>
-                            <p className='top-point-balace'>Saldo Período</p>
-                            <p className='low-point-balace'>
-                                <span className='pink'>+ </span><span>02h34min</span>
-                            </p>
-                        </div>
-                        <div className='balance-point'>
-                            <p className='top-point-balace'>Saldo Geral</p>
-                            <p className='low-point-balace'>
-                                <span className='pink'>+ </span><span>01h11min</span>
-                            </p>
-                        </div>
-                    </div>
-                    <p style={{ marginLeft: 10 }}>Período</p>
-                    <div className='filters-history'>
-                        <div className='left-filters'>
-                            <Select
-                                onChange={handleChange}
-                                className='select'
-                                options={[
-                                    { value: '1', label: '01/08 - 01/09' },
-                                    { value: '2', label: '01/07 - 01/08' },
-                                    { value: '3', label: '01/06 - 01/07' },
-                                ]}
-                            />
-                        </div>
-                        <div className='right-filters'>
-                            <TopButtons
-                                 />
-                        </div>
-                    </div>
-                    <HistoryPointTable />
-                </div>
+  const handleChange = (value: string) => {
+    const period = periods.find(p => p.id.toString() === value);
+    if (period) {
+      setSelectedPeriod({
+        start: period.startDate,
+        end: period.endDate,
+      });
+    }
+  };
+
+  const fetchPeriods = async () => {
+    try {
+      const organizationId = localStorage.getItem('organizationId');
+      if (!organizationId) {
+        throw new Error('Organização não encontrada.');
+      }
+
+      const response = await api.get(`/api/dueDateBank/periods/${organizationId}`);
+
+      setPeriods(response.data);
+
+      if (response.data.length > 0) {
+        const firstPeriod = response.data[0];
+        setSelectedPeriod({
+          start: firstPeriod.startDate,
+          end: firstPeriod.endDate,
+        });
+        setDefaultValue(firstPeriod.id.toString()); 
+      }
+    } catch (error) {
+      console.error('Erro ao buscar os períodos:', error);
+      message.error('Erro ao buscar os períodos.');
+    }
+  };
+
+  useEffect(() => {
+    fetchPeriods();
+  }, []);
+
+  return (
+    <div>
+      <Header />
+      <div className='container-user'>
+        <div className='table'>
+          <Breadcrumb />
+          <p style={{ marginLeft: 10 }}>Período</p>
+          <div className='filters-history'>
+            <div className='left-filters'>
+              <Select
+                onChange={handleChange}
+                className='select'
+                placeholder="Selecione o Período"
+                value={defaultValue} 
+                style={{ width: 250 }}
+                loading={periods.length === 0}
+              >
+                {periods.map(period => (
+                  <Option key={period.id} value={period.id.toString()}>
+                    {`${dayjs(period.startDate).format('DD/MM/YYYY')} - ${dayjs(period.endDate).format('DD/MM/YYYY')}${getPeriodStatus(period.startDate, period.endDate)}`}
+                  </Option>
+                ))}
+              </Select>
             </div>
+            <div className='right-filters'>
+              <TopButtons />
+            </div>
+          </div>
+          <HistoryPointTable selectedPeriod={selectedPeriod} />
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default HistoryPoint;

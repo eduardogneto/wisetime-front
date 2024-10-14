@@ -7,7 +7,7 @@ html, body {
     align-items: center;
     height: 100vh;
     font-family: 'Krona One', sans-serif;
-    background: linear-gradient(to right, #141C2D, #22070e); /* Gradiente do preto para azul escuro */
+    background: linear-gradient(to right, #141C2D, #22070e);
 }
 
 .container-login {

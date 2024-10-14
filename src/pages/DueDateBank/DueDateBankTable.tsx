@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../../components/Header/index.js';
 import './style.sass';
 import { ColumnsType } from 'antd/es/table/InternalTable';
 import { Table, Tag, message } from 'antd';
 import { TableRowSelection } from 'antd/es/table/interface';
-import api from '../../connection/api'; // Supondo que você tenha configurado o axios
+import api from '../../connection/api'; 
+import moment from 'moment';
+import { CheckCircleOutlined, ClockCircleOutlined, SyncOutlined } from '@ant-design/icons';
+
+interface DataType {
+    key: string;
+    period: string;
+    status: string[];
+    startDate: string; 
+}
 
 const DueDateBankTable: React.FC = () => {
-    interface DataType {
-        key: string;
-        period: string;
-        status: string[];
-    }
-
     const [data, setData] = useState<DataType[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -30,15 +32,18 @@ const DueDateBankTable: React.FC = () => {
     
                 if (!responseData || responseData.length === 0) {
                     message.warning('Nenhum período encontrado.');
+                    setData([]);
                     return;
                 }
     
-                // Transformar os dados recebidos para o formato da tabela
                 const transformedData = responseData.map((item: any) => ({
                     key: item.id,
-                    period: `${new Date(item.startDate).toLocaleDateString()} - ${new Date(item.endDate).toLocaleDateString()}`, 
+                    period: `${moment(item.startDate).format('DD/MM/YYYY')} - ${moment(item.endDate).format('DD/MM/YYYY')}`,
                     status: [item.tag],
+                    startDate: item.startDate, 
                 }));
+    
+                transformedData.sort((a, b) => moment(b.startDate).unix() - moment(a.startDate).unix());
     
                 setData(transformedData);
             } catch (error) {
@@ -65,18 +70,39 @@ const DueDateBankTable: React.FC = () => {
             dataIndex: 'status',
             align: 'center',
             render: (_, { status }) => (
-                <>
-                    {status.map(tag => {
-                        let color = tag === 'COMPLETO' ? 'green' : 'blue';
-                        return (
-                            <Tag color={color} key={tag}>
-                                {tag.toUpperCase()}
-                            </Tag>
-                        );
-                    })}
-                </>
+              <>
+                {status.map((tag) => {
+                  let color = '';
+                  let icon;
+                  let traduction = '';
+                  switch (tag.toUpperCase()) {
+                    case 'COMPLETO':
+                      color = 'green';
+                      icon = <CheckCircleOutlined />
+                      traduction = 'Completo';
+                      break;
+                    case 'ANDAMENTO':
+                      color = 'blue';
+                      icon = <SyncOutlined spin />
+                      traduction = 'Em Andamento';
+                      break;
+                    case 'PROXIMO':
+                      color = 'purple';
+                      icon = <ClockCircleOutlined />
+                      traduction = 'Próximo';
+                      break;
+                    default:
+                      color = 'gray'; 
+                  }
+                  return (
+                    <Tag color={color} icon={icon} key={tag}>
+                      {traduction.toUpperCase()}
+                    </Tag>
+                  );
+                })}
+              </>
             ),
-        },
+          },          
     ];
 
     const rowSelection: TableRowSelection<DataType> = {
@@ -95,12 +121,12 @@ const DueDateBankTable: React.FC = () => {
         <>
             <Table
                 rowSelection={{ ...rowSelection }}
+                className='tables-wise'
                 scroll={{ y: 400 }}
-                style={{ marginTop: 20 }}
                 pagination={false}
                 columns={columns}
                 dataSource={data}
-                loading={loading} // Adicionar o estado de loading
+                loading={loading}
             />
         </>
     );

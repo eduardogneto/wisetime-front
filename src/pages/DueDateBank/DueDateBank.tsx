@@ -6,8 +6,8 @@ import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
 import { Select, Table, Tag, Modal, Input, DatePicker, message } from 'antd';
 import DueDateBankTable from './DueDateBankTable.tsx';
 import { TopButtons } from '../../components/TopButtons/TopButtons.tsx';
-import api from '../../connection/api'; // Supondo que já tenha a configuração do Axios
-import moment, { Moment } from 'moment'; // Certifique-se de importar o Moment
+import api from '../../connection/api'; 
+import moment, { Moment } from 'moment'; 
 
 const { RangePicker } = DatePicker;
 
@@ -18,7 +18,7 @@ const DueDateBank: React.FC = () => {
   const [tag, setTag] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const organizationId = localStorage.getItem('organizationId'); // Pegando o organizationId do localStorage
+  const organizationId = localStorage.getItem('organizationId'); 
 
   const handleTagChange = (value: string) => {
     setTag(value);
@@ -57,8 +57,8 @@ const DueDateBank: React.FC = () => {
 
     const payload = {
       organizationId: organizationId,
-      startDate: startDate.format('YYYY-MM-DD'), // Certifique-se de que startDate seja um Moment válido
-      endDate: endDate.format('YYYY-MM-DD'), // Certifique-se de que endDate seja um Moment válido
+      startDate: startDate.format('YYYY-MM-DD'), 
+      endDate: endDate.format('YYYY-MM-DD'), 
       tag,
     };
 
@@ -108,7 +108,6 @@ const DueDateBank: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal para adicionar novo período */}
       <Modal
         title="Adicionar Período de Ponto"
         visible={isModalOpen}

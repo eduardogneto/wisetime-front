@@ -83,11 +83,9 @@ const Organization: React.FC = () => {
 
         try {
           if (isEditMode && selectedOrganizationId) {
-            // Atualizar organização
             await api.put(`/api/organizations/${selectedOrganizationId}`, organizationData);
             message.success('Organização atualizada com sucesso!');
           } else {
-            // Criar nova organização
             await api.post('/api/organizations/organizations', organizationData);
             message.success('Organização criada com sucesso!');
           }
@@ -103,7 +101,6 @@ const Organization: React.FC = () => {
       });
   };
 
-  // Função para lidar com a edição
   const handleEdit = async () => {
     if (selectedOrganizationId === null) {
       message.warning('Por favor, selecione uma organização para editar.');
@@ -111,7 +108,6 @@ const Organization: React.FC = () => {
     }
 
     try {
-      // Buscar dados completos da organização
       const response = await api.get(`/api/organizations/${selectedOrganizationId}`);
       const orgData = response.data;
 
@@ -123,7 +119,6 @@ const Organization: React.FC = () => {
         address: orgData.address,
       });
 
-      // Definir times com chaves únicas
       const teamsWithKeys = orgData.teams.map((team: any, index: number) => ({
         key: `${Date.now()}-${index}`,
         name: team.name,
@@ -138,7 +133,6 @@ const Organization: React.FC = () => {
     }
   };
 
-  // Definição de teamColumns (faltante anteriormente)
   const teamColumns = [
     {
       title: 'Nome do Time',
@@ -219,7 +213,6 @@ const Organization: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal para cadastro/edição da organização */}
       <Modal
         title={isEditMode ? 'Editar Organização' : 'Cadastrar Organização'}
         visible={isModalOpen}
@@ -235,7 +228,6 @@ const Organization: React.FC = () => {
         ]}
         bodyStyle={{ maxHeight: '70vh', overflowX: 'hidden', overflowY: 'auto' }}
       >
-        {/* Formulário para os dados da organização */}
         <Form form={form} layout="vertical">
           <Row gutter={16}>
             <Col span={6}>
@@ -264,7 +256,6 @@ const Organization: React.FC = () => {
             </Col>
           </Row>
 
-          {/* Endereço */}
           <Form.Item label="Endereço">
             <Row gutter={16}>
               <Col span={8}>
@@ -318,7 +309,6 @@ const Organization: React.FC = () => {
             </Row>
           </Form.Item>
 
-          {/* Tabela para adicionar times */}
           <div style={{ marginTop: 20 }}>
             <Space style={{ marginBottom: 16 }}>
               <Button type="dashed" onClick={handleAddTeam} icon={<PlusOutlined />}>
@@ -326,6 +316,7 @@ const Organization: React.FC = () => {
               </Button>
             </Space>
             <Table
+              className='tables-wise'
               columns={teamColumns}
               dataSource={teams}
               pagination={false}

@@ -20,24 +20,44 @@ interface DetailData {
   editable?: boolean;
 }
 
+interface HistoryPointTableProps {
+  selectedPeriod: { start: string; end: string };
+}
+
 const { Option } = Select;
 
-const HistoryPointTable: React.FC = () => {
+const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod }) => {
   const [data, setData] = useState<DataType[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false); 
   const [detailData, setDetailData] = useState<DetailData[]>([]);
   const [addedPunches, setAddedPunches] = useState<DetailData[]>([]);
   const [loading, setLoading] = useState(false);
   const [justification, setJustification] = useState('');
-  const [selectedDate, setSelectedDate] = useState(''); // Estado para armazenar a data selecionada
+  const [selectedDate, setSelectedDate] = useState(''); 
+  const [editPunch, setEditPunch] = useState<DetailData | null>(null); 
 
-  // Função para buscar histórico resumido
+  const getDatesInRange = (start: string, end: string) => {
+    const startDate = dayjs(start);
+    const endDate = dayjs(end);
+    const dates = [];
+
+    let currentDate = startDate;
+    while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
+      dates.push(currentDate.format('DD/MM/YYYY'));
+      currentDate = currentDate.add(1, 'day');
+    }
+
+    return dates;
+  };
+
   const fetchHistoryData = async () => {
     setLoading(true);
     try {
       const userId = localStorage.getItem('id');
       const response = await api.get(`/api/punch/history/summary/${userId}`);
-      const fetchedData = response.data.map((item: any) => ({
+
+      const punchData = response.data.map((item: any) => ({
         key: item.date,
         date: dayjs(item.date).format('DD/MM/YYYY'),
         entrys: item.entryCount,
@@ -45,13 +65,14 @@ const HistoryPointTable: React.FC = () => {
         tags: [item.status],
       }));
 
-      const sortedData = fetchedData.sort((a, b) => {
-        const dateA = dayjs(a.date, 'DD/MM/YYYY');
-        const dateB = dayjs(b.date, 'DD/MM/YYYY');
-        return dateB.unix() - dateA.unix();
+      const allDates = getDatesInRange(selectedPeriod.start, selectedPeriod.end);
+
+      const combinedData = allDates.map(date => {
+        const punchForDate = punchData.find(p => p.date === date);
+        return punchForDate || { key: date, date, entrys: 0, outs: 0, tags: ['Incompleto'] };
       });
 
-      setData(sortedData);
+      setData(combinedData);
     } catch (error) {
       message.error('Erro ao buscar o histórico.');
     } finally {
@@ -59,7 +80,6 @@ const HistoryPointTable: React.FC = () => {
     }
   };
 
-  // Função para buscar detalhes das batidas
   const fetchPunchDetails = async (date: string) => {
     setLoading(true);
     try {
@@ -87,7 +107,6 @@ const HistoryPointTable: React.FC = () => {
     }
   };
 
-  // Adicionar uma nova batida
   const addNewPunch = () => {
     const newPunch: DetailData = {
       id: (Math.random() * 1000).toString(),
@@ -99,7 +118,28 @@ const HistoryPointTable: React.FC = () => {
     setAddedPunches([...addedPunches, newPunch]);
   };
 
-  // Função para atualizar os valores dos campos editáveis
+  const handleEdit = (record: DetailData) => {
+    setEditPunch(record); 
+    setEditModalVisible(true); 
+  };
+
+  const confirmEditPunch = async (newStatus: string) => {
+    if (!editPunch) return;
+
+    Modal.confirm({
+      title: 'Confirmação de Edição',
+      content: `Tem certeza que deseja trocar de ${editPunch.status} para ${newStatus}?`,
+      onOk: () => {
+        const updatedData = detailData.map(punch =>
+          punch.id === editPunch.id ? { ...punch, status: newStatus, editable: false } : punch
+        );
+        setDetailData(updatedData);
+        setEditModalVisible(false);
+        message.success('Tipo de ponto alterado com sucesso!');
+      },
+    });
+  };
+
   const updatePunch = (id: string, field: string, value: any) => {
     const updatedData = detailData.map((item) =>
       item.id === id ? { ...item, [field]: value } : item
@@ -112,7 +152,6 @@ const HistoryPointTable: React.FC = () => {
     setAddedPunches(updatedNewPunches);
   };
 
-  // Enviar a justificativa ao coordenador
   const sendRequest = async () => {
     try {
       if (addedPunches.length === 0) {
@@ -126,7 +165,6 @@ const HistoryPointTable: React.FC = () => {
 
       const id = localStorage.getItem('id');
 
-      // Convertendo a data selecionada para o formato 'YYYY-MM-DD'
       const date = dayjs(selectedDate, 'DD/MM/YYYY').format('YYYY-MM-DD');
 
       const requestPayload = {
@@ -143,14 +181,12 @@ const HistoryPointTable: React.FC = () => {
         }),
       };
 
-      // Verifica se alguma data é inválida
       const hasEmptyTime = requestPayload.punches.some(punch => punch.hours === `${date}T:00`);
       if (hasEmptyTime) {
         message.error('Há horários vazios. Por favor, preencha antes de enviar.');
         return;
       }
 
-      // Envia a solicitação ao backend
       await api.post('/api/request/create', requestPayload);
 
       message.success('Solicitação enviada ao coordenador.');
@@ -164,14 +200,13 @@ const HistoryPointTable: React.FC = () => {
 
   useEffect(() => {
     fetchHistoryData();
-  }, []);
+  }, [selectedPeriod]); 
 
   const handleDetail = (record: DataType) => {
-    setSelectedDate(record.date); // Armazenando a data selecionada
+    setSelectedDate(record.date); 
     fetchPunchDetails(record.date);
   };
 
-  // Colunas para a tabela de histórico de pontos
   const columns: ColumnsType<DataType> = [
     {
       title: 'Data',
@@ -212,16 +247,15 @@ const HistoryPointTable: React.FC = () => {
       key: 'action',
       render: (_, record) => (
         <EditDelete
+          allowEdit
+          onEdit={() => handleEdit(record)}
           showDetail
           onDetail={() => handleDetail(record)}
-          allowDelete
-          allowEdit
         />
       ),
     },
   ];
 
-  // Colunas para a tabela de batidas no modal
   const punchColumns: ColumnsType<DetailData> = [
     {
       title: 'Status',
@@ -231,7 +265,7 @@ const HistoryPointTable: React.FC = () => {
         record.editable ? (
           <Select
             value={record.status}
-            onChange={(value) => updatePunch(record.id, 'status', value)}
+            onChange={(value) => confirmEditPunch(value)}
             style={{ width: '100%' }}
           >
             <Option value="Entrada">Entrada</Option>
@@ -261,9 +295,10 @@ const HistoryPointTable: React.FC = () => {
   return (
     <>
       <Table
-        style={{ marginTop: 10 }}
+        className='tables-wise'
         columns={columns}
         dataSource={data}
+        pagination={false}
         loading={loading}
       />
 
@@ -284,6 +319,7 @@ const HistoryPointTable: React.FC = () => {
         }
       >
         <Table
+          className='tables-wise'
           columns={punchColumns}
           dataSource={detailData}
           pagination={false}
@@ -303,6 +339,24 @@ const HistoryPointTable: React.FC = () => {
           </Form>
         )}
       </Modal>
+
+      {editPunch && (
+        <Modal
+          title="Editar Tipo de Ponto"
+          visible={editModalVisible}
+          onCancel={() => setEditModalVisible(false)}
+          footer={null}
+        >
+          <Select
+            value={editPunch.status}
+            onChange={(value) => confirmEditPunch(value)}
+            style={{ width: '100%' }}
+          >
+            <Option value="Entrada">Entrada</Option>
+            <Option value="Saída">Saída</Option>
+          </Select>
+        </Modal>
+      )}
     </>
   );
 };

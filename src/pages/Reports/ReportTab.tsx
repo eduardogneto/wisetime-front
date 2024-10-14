@@ -1,4 +1,3 @@
-// src/components/ReportTab/ReportTab.tsx
 import React from 'react';
 import { Bar, Pie, Line } from 'react-chartjs-2';
 import { Table } from 'antd';
@@ -34,7 +33,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ title, chartType, chartData, char
                     {renderChart()}
                 </div>
                 <div className="table-container">
-                    <Table dataSource={tableData} columns={tableColumns} pagination={false} />
+                    <Table className='tables-wise' dataSource={tableData} columns={tableColumns} pagination={false} />
                 </div>
             </div>
         </div>

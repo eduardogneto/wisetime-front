@@ -106,6 +106,7 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
 
   return (
     <Table
+      className='tables-wise'
       pagination={false}
       scroll={{ y: 400 }}
       columns={columns}
@@ -114,7 +115,6 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
         type: 'checkbox',
         ...rowSelection,
       }}
-      style={{ marginTop: 20 }}
     />
   );
 };

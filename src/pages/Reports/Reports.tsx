@@ -1,4 +1,3 @@
-// src/pages/Reports/Reports.tsx
 import React, { useState, useEffect } from 'react';
 import './style.sass';
 import { Tabs, Select } from 'antd';

@@ -44,13 +44,13 @@ export default function SignIn() {
             const { token, user } = response.data;
     
             await Promise.all([
-                setLocalStorage('token', token), // Token JWT retornado pela API
+                setLocalStorage('token', token), 
                 setLocalStorage('id', user.id),
                 setLocalStorage('name', user.name),
                 setLocalStorage('email', user.email),
-                setLocalStorage('organizationId', user.team.organizationId), // Organization ID vindo de TeamDTO
+                setLocalStorage('organizationId', user.team.organizationId), 
                 setLocalStorage('tag', user.tag),
-                setLocalStorage('team', JSON.stringify(user.team)) // Salvando o team como string
+                setLocalStorage('team', JSON.stringify(user.team)) 
             ]);
     
             message.success(`Bem-vindo de volta ${user.name}!`);

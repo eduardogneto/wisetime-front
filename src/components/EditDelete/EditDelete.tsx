@@ -9,19 +9,26 @@ interface EditDeleteProps {
   allowEdit?: boolean
   allowDelete?: boolean
   onDetail?: () => void
+  onEdit?: () => void
 }
 
 const EditDelete: React.FC<EditDeleteProps> = ({
   showDetail = false,
   allowEdit = false,
   allowDelete = false,
-  onDetail, 
+  onDetail,
+  onEdit,
 }) => {
   const handleEdit = () => {
-    message.info('Ação de editar')
+    if (onEdit) {
+      onEdit()
+    } else {
+      message.info('Ação de editar')
+    }
   }
 
   const handleDelete = () => {
+
     message.info('Ação de deletar')
   }
 

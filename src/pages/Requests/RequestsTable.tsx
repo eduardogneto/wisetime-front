@@ -3,7 +3,7 @@ import { ColumnsType } from 'antd/es/table';
 import { Table, Tag, Avatar, message, Modal, List, Button } from 'antd';
 import EditDelete from '../../components/EditDelete/EditDelete.tsx';
 import api from '../../connection/api';
-import dayjs from 'dayjs'; // Importamos o dayjs para manipulação de datas
+import dayjs from 'dayjs';
 
 interface Punch {
   status: string;
@@ -22,24 +22,31 @@ interface DataType {
 
 interface RequestTableProps {
   filters: string[];
+  onActionCompleted: () => void;
 }
 
-const RequestTable: React.FC<RequestTableProps> = ({ filters }) => {
+const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted }) => {
   const [data, setData] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<DataType | null>(null);
 
-  // Função para buscar as solicitações do backend
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const userId = localStorage.getItem('id');
-      if (!userId) {
-        throw new Error('User ID não encontrado no localStorage');
+      const teamString = localStorage.getItem('team');
+      let teamId;
+      if (teamString) {
+        try {
+            const team = JSON.parse(teamString);
+            teamId = team.id;
+        } catch (error) {
+            console.error('Erro ao analisar o JSON:', error);
+        }
+      } else {
+          console.log('Nenhum item "team" encontrado no localStorage.');
       }
 
-      // Mapeamento dos valores selecionados para os esperados pelo backend
       const typeMapping: { [key: string]: string } = {
         '1': 'ADICAO_DE_PONTO',
         '2': 'DELETAR',
@@ -53,7 +60,6 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters }) => {
         'reprovados': 'REPROVADO',
       };
 
-      // Separar os filtros selecionados
       const selectedTypes = filters
         .filter(value => Object.keys(typeMapping).includes(value))
         .map(value => typeMapping[value]);
@@ -62,14 +68,12 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters }) => {
         .filter(value => Object.keys(statusMapping).includes(value))
         .map(value => statusMapping[value]);
 
-      // Montar o objeto de filtros
       const filterData = {
-        userId: userId,
+        teamId: teamId,
         types: selectedTypes,
         statuses: selectedStatuses,
       };
 
-      // Fazer a requisição POST para o endpoint de filtro
       const response = await api.post('/api/request/filter', filterData);
 
       const fetchedData = response.data.map((request: any) => ({
@@ -89,7 +93,6 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters }) => {
     }
   };
 
-  // Reexecutar a busca sempre que os filtros forem atualizados
   useEffect(() => {
     fetchRequests();
   }, [filters]);
@@ -108,7 +111,6 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters }) => {
     setIsModalVisible(true);
   };
 
-  // Função para aprovar uma solicitação
   const approveRequest = async () => {
     if (!selectedRequest) return;
 
@@ -118,13 +120,13 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters }) => {
       });
       message.success('Solicitação aprovada com sucesso!');
       setIsModalVisible(false);
-      fetchRequests();
+      fetchRequests(); 
+      onActionCompleted(); 
     } catch (error) {
       message.error('Erro ao aprovar a solicitação');
     }
   };
 
-  // Função para reprovar uma solicitação
   const rejectRequest = async () => {
     if (!selectedRequest) return;
 
@@ -134,7 +136,8 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters }) => {
       });
       message.success('Solicitação reprovada com sucesso!');
       setIsModalVisible(false);
-      fetchRequests();
+      fetchRequests(); 
+      onActionCompleted(); 
     } catch (error) {
       message.error('Erro ao reprovar a solicitação');
     }
@@ -220,7 +223,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters }) => {
 
   return (
     <>
-      <Table style={{ marginTop: 10 }} columns={columns} dataSource={data} loading={loading} />
+      <Table className='tables-wise' style={{maxHeight:'calc(100% - 40%)'}} pagination={false} columns={columns} dataSource={data} loading={loading} />
 
       {selectedRequest && (
         <Modal

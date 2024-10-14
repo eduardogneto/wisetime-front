@@ -4,10 +4,8 @@ import { Breadcrumb, Dropdown, Menu } from 'antd';
 import { UserOutlined, HomeOutlined } from '@ant-design/icons';
 
 const BreadcrumbComponent: React.FC = () => {
-    // Obtém o caminho atual do URL após a barra "/"
     const path = window.location.pathname.slice(1);
 
-    // Mapeamento de caminhos para nomes de tela
     const pathToNameMap: { [key: string]: string } = {
         users: 'Usuários',
         dashboard: 'Painel de Controle',
@@ -17,10 +15,8 @@ const BreadcrumbComponent: React.FC = () => {
         requests: 'Solicitações',
         organization: 'Times e Organizações',
         reports: 'Relatórios',
-        // Adicione outros mapeamentos conforme necessário
     };
 
-    // Itens do menu para a gestão
     const menuItems = (
         <Menu>
             <Menu.Item key="1">
@@ -32,14 +28,11 @@ const BreadcrumbComponent: React.FC = () => {
             <Menu.Item key="3">
                 <a href="/management/settings">Configurações</a>
             </Menu.Item>
-            {/* Adicione outros itens conforme necessário */}
         </Menu>
     );
 
-    // Divide o caminho em partes
     const pathParts = path.split('/');
 
-    // Função para obter o nome da tela baseado no caminho
     const getScreenName = (part: string) => pathToNameMap[part] || part;
 
     return (
