@@ -4,6 +4,8 @@ import { Table, Tag, Modal, Button, message, Input, Form, Select } from 'antd';
 import EditDelete from '../../components/EditDelete/EditDelete.tsx';
 import api from '../../connection/api';
 import dayjs from 'dayjs';
+import 'dayjs/locale/pt-br'; // Importa o locale para português
+dayjs.locale('pt-br'); // Define o locale para pt-br
 
 interface DataType {
   key: string;
@@ -26,16 +28,21 @@ interface HistoryPointTableProps {
 
 const { Option } = Select;
 
+// Função para obter o nome do dia da semana
+const getWeekdayName = (date: dayjs.Dayjs) => {
+  return date.format('dddd'); // Retorna o nome do dia da semana em português
+};
+
 const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod }) => {
   const [data, setData] = useState<DataType[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editModalVisible, setEditModalVisible] = useState(false); 
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [detailData, setDetailData] = useState<DetailData[]>([]);
   const [addedPunches, setAddedPunches] = useState<DetailData[]>([]);
   const [loading, setLoading] = useState(false);
   const [justification, setJustification] = useState('');
-  const [selectedDate, setSelectedDate] = useState(''); 
-  const [editPunch, setEditPunch] = useState<DetailData | null>(null); 
+  const [selectedDate, setSelectedDate] = useState('');
+  const [editPunch, setEditPunch] = useState<DetailData | null>(null);
 
   const getDatesInRange = (start: string, end: string) => {
     const startDate = dayjs(start);
@@ -56,22 +63,39 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
     try {
       const userId = localStorage.getItem('id');
       const response = await api.get(`/api/punch/history/summary/${userId}`);
-
-      const punchData = response.data.map((item: any) => ({
-        key: item.date,
-        date: dayjs(item.date).format('DD/MM/YYYY'),
-        entrys: item.entryCount,
-        outs: item.exitCount,
-        tags: [item.status],
-      }));
-
+  
+      const punchData = response.data.length > 0
+        ? response.data.map((item: any) => {
+            const dateObj = dayjs(item.date); // Padroniza o uso de dayjs
+            return {
+              key: item.date,
+              date: `${dateObj.format('DD/MM/YYYY')} - ${getWeekdayName(dateObj)}`, // Data + Dia da semana
+              entrys: item.entryCount || 0, // Garante que seja um número
+              outs: item.exitCount || 0, // Garante que seja um número
+              tags: [item.status || 'Incompleto'],
+            };
+          })
+        : [];
+  
       const allDates = getDatesInRange(selectedPeriod.start, selectedPeriod.end);
-
-      const combinedData = allDates.map(date => {
-        const punchForDate = punchData.find(p => p.date === date);
-        return punchForDate || { key: date, date, entrys: 0, outs: 0, tags: ['Incompleto'] };
+  
+      const combinedData = allDates.map((date) => {
+        const dateObj = dayjs(date, 'DD/MM/YYYY'); // Padroniza para DD/MM/YYYY
+        const punchForDate = punchData.find((p) =>
+          dayjs(p.key).isSame(dateObj, 'day') // Compara usando dayjs
+        );
+  
+        return (
+          punchForDate || {
+            key: date,
+            date: `${date} - ${getWeekdayName(dateObj)}`,
+            entrys: 0,
+            outs: 0,
+            tags: ['Incompleto'],
+          }
+        );
       });
-
+  
       setData(combinedData);
     } catch (error) {
       message.error('Erro ao buscar o histórico.');
@@ -79,6 +103,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       setLoading(false);
     }
   };
+  
 
   const fetchPunchDetails = async (date: string) => {
     setLoading(true);
@@ -119,8 +144,8 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
   };
 
   const handleEdit = (record: DetailData) => {
-    setEditPunch(record); 
-    setEditModalVisible(true); 
+    setEditPunch(record);
+    setEditModalVisible(true);
   };
 
   const confirmEditPunch = async (newStatus: string) => {
@@ -200,10 +225,10 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
 
   useEffect(() => {
     fetchHistoryData();
-  }, [selectedPeriod]); 
+  }, [selectedPeriod]);
 
   const handleDetail = (record: DataType) => {
-    setSelectedDate(record.date); 
+    setSelectedDate(record.date);
     fetchPunchDetails(record.date);
   };
 
