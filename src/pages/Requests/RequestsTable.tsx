@@ -10,6 +10,14 @@ interface Punch {
   hours: string;
 }
 
+interface Certificate {
+  id: number;
+  startDate: string;
+  endDate: string;
+  justification: string;
+  status: string;
+}
+
 interface DataType {
   key: string;
   applicant: string;
@@ -18,6 +26,7 @@ interface DataType {
   justification?: string;
   punches?: Punch[];
   status: string;
+  certificate?: Certificate;
 }
 
 interface RequestTableProps {
@@ -30,6 +39,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<DataType | null>(null);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -38,13 +48,13 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
       let teamId;
       if (teamString) {
         try {
-            const team = JSON.parse(teamString);
-            teamId = team.id;
+          const team = JSON.parse(teamString);
+          teamId = team.id;
         } catch (error) {
-            console.error('Erro ao analisar o JSON:', error);
+          console.error('Erro ao analisar o JSON:', error);
         }
       } else {
-          console.log('Nenhum item "team" encontrado no localStorage.');
+        console.log('Nenhum item "team" encontrado no localStorage.');
       }
 
       const typeMapping: { [key: string]: string } = {
@@ -55,9 +65,9 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
       };
 
       const statusMapping: { [key: string]: string } = {
-        'em_aberto': 'PENDENTE',
-        'aprovados': 'APROVADO',
-        'reprovados': 'REPROVADO',
+        em_aberto: 'PENDENTE',
+        aprovados: 'APROVADO',
+        reprovados: 'REPROVADO',
       };
 
       const selectedTypes = filters
@@ -84,6 +94,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
         justification: request.justification,
         punches: request.punches,
         status: request.status,
+        certificate: request.certificate,
       }));
       setData(fetchedData);
     } catch (error) {
@@ -106,9 +117,32 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
     return 'NN';
   };
 
-  const showDetailModal = (record: DataType) => {
+  const showDetailModal = async (record: DataType) => {
     setSelectedRequest(record);
+
+    if (record.type === 'ATESTADO' && record.certificate) {
+      try {
+        const response = await api.get(`/api/certificate/image/${record.certificate.id}`, {
+          responseType: 'blob',
+        });
+        const imageBlob = response.data;
+        const imageUrl = URL.createObjectURL(imageBlob);
+        setImageSrc(imageUrl);
+      } catch (error) {
+        message.error('Erro ao buscar a imagem do atestado');
+      }
+    } else {
+      setImageSrc(null);
+    }
     setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    if (imageSrc) {
+      URL.revokeObjectURL(imageSrc);
+      setImageSrc(null);
+    }
   };
 
   const approveRequest = async () => {
@@ -119,9 +153,9 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
         status: 'APROVADO',
       });
       message.success('Solicitação aprovada com sucesso!');
-      setIsModalVisible(false);
-      fetchRequests(); 
-      onActionCompleted(); 
+      handleModalClose();
+      fetchRequests();
+      onActionCompleted();
     } catch (error) {
       message.error('Erro ao aprovar a solicitação');
     }
@@ -135,9 +169,9 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
         status: 'REPROVADO',
       });
       message.success('Solicitação reprovada com sucesso!');
-      setIsModalVisible(false);
-      fetchRequests(); 
-      onActionCompleted(); 
+      handleModalClose();
+      fetchRequests();
+      onActionCompleted();
     } catch (error) {
       message.error('Erro ao reprovar a solicitação');
     }
@@ -214,8 +248,8 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
         <EditDelete
           showDetail
           onDetail={() => showDetailModal(record)}
-          allowDelete
-          allowEdit
+          allowDelete={false} 
+          allowEdit={false} 
         />
       ),
     },
@@ -223,13 +257,20 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
 
   return (
     <>
-      <Table className='tables-wise' style={{maxHeight:'calc(100% - 40%)'}} pagination={false} columns={columns} dataSource={data} loading={loading} />
+      <Table
+        className="tables-wise"
+        style={{ maxHeight: 'calc(100% - 40%)' }}
+        pagination={false}
+        columns={columns}
+        dataSource={data}
+        loading={loading}
+      />
 
       {selectedRequest && (
         <Modal
           title="Detalhes da Solicitação"
           visible={isModalVisible}
-          onCancel={() => setIsModalVisible(false)}
+          onCancel={handleModalClose}
           footer={
             selectedRequest.status === 'PENDENTE' && [
               <Button key="reject" onClick={rejectRequest} danger>
@@ -241,24 +282,36 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
             ]
           }
         >
-          <h3 style={{ color: 'black' }}>
-            Justificativa: {selectedRequest.justification || 'Não informada'}
-          </h3>
-
           {selectedRequest.type === 'ADICAO_DE_PONTO' && (
             <>
               <h4>Pontos Inseridos</h4>
+              <h3>Justificativa: {selectedRequest.justification || 'Não informada'}</h3>
               <List
                 dataSource={selectedRequest.punches || []}
                 renderItem={punch => (
                   <List.Item>
                     <List.Item.Meta
                       title={punch.status === 'ENTRY' ? 'Entrada' : 'Saída'}
-                      description={`Horário: ${dayjs(punch.hours).format('HH:mm')}`} 
+                      description={`Horário: ${dayjs(punch.hours).format('HH:mm')}`}
                     />
                   </List.Item>
                 )}
               />
+            </>
+          )}
+
+          {selectedRequest.type === 'ATESTADO' && selectedRequest.certificate && (
+            <>
+              <h4>Dados do Atestado</h4>
+              <p>Data de Início: {dayjs(selectedRequest.certificate.startDate).format('DD/MM/YYYY')}</p>
+              <p>Data de Fim: {dayjs(selectedRequest.certificate.endDate).format('DD/MM/YYYY')}</p>
+              <p>Justificativa: {selectedRequest.justification || 'Não informada'}</p>
+              {imageSrc && (
+                <div>
+                  <h4>Imagem do Atestado</h4>
+                  <img src={imageSrc} alt="Atestado" style={{ maxWidth: '100%' }} />
+                </div>
+              )}
             </>
           )}
         </Modal>

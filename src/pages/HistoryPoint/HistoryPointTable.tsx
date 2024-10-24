@@ -1,11 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { ColumnsType } from 'antd/es/table';
-import { Table, Tag, Modal, Button, message, Input, Form, Select } from 'antd';
+import {
+  Table,
+  Tag,
+  Modal,
+  Button,
+  message,
+  Input,
+  Form,
+  Select,
+  DatePicker,
+  Upload,
+} from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import EditDelete from '../../components/EditDelete/EditDelete.tsx';
 import api from '../../connection/api';
 import dayjs from 'dayjs';
-import 'dayjs/locale/pt-br'; // Importa o locale para português
-dayjs.locale('pt-br'); // Define o locale para pt-br
+import 'dayjs/locale/pt-br'; 
+dayjs.locale('pt-br'); 
 
 interface DataType {
   key: string;
@@ -28,9 +40,8 @@ interface HistoryPointTableProps {
 
 const { Option } = Select;
 
-// Função para obter o nome do dia da semana
 const getWeekdayName = (date: dayjs.Dayjs) => {
-  return date.format('dddd'); // Retorna o nome do dia da semana em português
+  return date.format('dddd'); 
 };
 
 const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod }) => {
@@ -43,6 +54,21 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
   const [justification, setJustification] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [editPunch, setEditPunch] = useState<DetailData | null>(null);
+
+  const [isCertificateModalVisible, setIsCertificateModalVisible] = useState(false);
+  const [certificateData, setCertificateData] = useState<{
+    startDate: any;
+    endDate: any;
+    photo: any;
+    imageBase64: string; 
+    justification: string;
+  }>({
+    startDate: null,
+    endDate: null,
+    photo: null,
+    imageBase64: '',
+    justification: '',
+  });
 
   const getDatesInRange = (start: string, end: string) => {
     const startDate = dayjs(start);
@@ -63,28 +89,29 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
     try {
       const userId = localStorage.getItem('id');
       const response = await api.get(`/api/punch/history/summary/${userId}`);
-  
-      const punchData = response.data.length > 0
-        ? response.data.map((item: any) => {
-            const dateObj = dayjs(item.date); // Padroniza o uso de dayjs
-            return {
-              key: item.date,
-              date: `${dateObj.format('DD/MM/YYYY')} - ${getWeekdayName(dateObj)}`, // Data + Dia da semana
-              entrys: item.entryCount || 0, // Garante que seja um número
-              outs: item.exitCount || 0, // Garante que seja um número
-              tags: [item.status || 'Incompleto'],
-            };
-          })
-        : [];
-  
+
+      const punchData =
+        response.data.length > 0
+          ? response.data.map((item: any) => {
+              const dateObj = dayjs(item.date); 
+              return {
+                key: item.date,
+                date: `${dateObj.format('DD/MM/YYYY')} - ${getWeekdayName(dateObj)}`, 
+                entrys: item.entryCount || 0,
+                outs: item.exitCount || 0, 
+                tags: [item.status || 'Incompleto'],
+              };
+            })
+          : [];
+
       const allDates = getDatesInRange(selectedPeriod.start, selectedPeriod.end);
-  
+
       const combinedData = allDates.map((date) => {
-        const dateObj = dayjs(date, 'DD/MM/YYYY'); // Padroniza para DD/MM/YYYY
+        const dateObj = dayjs(date, 'DD/MM/YYYY');
         const punchForDate = punchData.find((p) =>
-          dayjs(p.key).isSame(dateObj, 'day') // Compara usando dayjs
+          dayjs(p.key).isSame(dateObj, 'day') 
         );
-  
+
         return (
           punchForDate || {
             key: date,
@@ -95,7 +122,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
           }
         );
       });
-  
+
       setData(combinedData);
     } catch (error) {
       message.error('Erro ao buscar o histórico.');
@@ -103,7 +130,6 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       setLoading(false);
     }
   };
-  
 
   const fetchPunchDetails = async (date: string) => {
     setLoading(true);
@@ -155,7 +181,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       title: 'Confirmação de Edição',
       content: `Tem certeza que deseja trocar de ${editPunch.status} para ${newStatus}?`,
       onOk: () => {
-        const updatedData = detailData.map(punch =>
+        const updatedData = detailData.map((punch) =>
           punch.id === editPunch.id ? { ...punch, status: newStatus, editable: false } : punch
         );
         setDetailData(updatedData);
@@ -196,7 +222,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         id,
         requestType: 'ADICAO_DE_PONTO',
         justification,
-        punches: addedPunches.map(punch => {
+        punches: addedPunches.map((punch) => {
           const fullDateTime = `${date}T${punch.hours}:00`;
 
           return {
@@ -206,7 +232,9 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         }),
       };
 
-      const hasEmptyTime = requestPayload.punches.some(punch => punch.hours === `${date}T:00`);
+      const hasEmptyTime = requestPayload.punches.some(
+        (punch) => punch.hours === `${date}T:00`
+      );
       if (hasEmptyTime) {
         message.error('Há horários vazios. Por favor, preencha antes de enviar.');
         return;
@@ -220,6 +248,52 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       setJustification('');
     } catch (error) {
       message.error('Erro ao enviar a solicitação.');
+    }
+  };
+
+  const handleCertificate = (record: DataType) => {
+    setSelectedDate(record.date);
+    setIsCertificateModalVisible(true);
+  };
+
+  const submitCertificate = async () => {
+    if (
+      !certificateData.startDate ||
+      !certificateData.endDate ||
+      !certificateData.imageBase64 ||
+      !certificateData.justification
+    ) {
+      message.warning('Por favor, preencha todos os campos e anexe o atestado.');
+      return;
+    }
+
+    try {
+      const id = localStorage.getItem('id');
+
+      const requestPayload = {
+        id,
+        requestType: 'ATESTADO',
+        justification: certificateData.justification,
+        certificate: {
+          startDate: certificateData.startDate.format('YYYY-MM-DD'),
+          endDate: certificateData.endDate.format('YYYY-MM-DD'),
+          imageBase64: certificateData.imageBase64,
+        },
+      };
+
+      await api.post('/api/request/create', requestPayload);
+
+      message.success('Atestado enviado com sucesso.');
+      setCertificateData({
+        startDate: null,
+        endDate: null,
+        photo: null,
+        imageBase64: '',
+        justification: '',
+      });
+      setIsCertificateModalVisible(false);
+    } catch (error) {
+      message.error('Erro ao enviar o atestado.');
     }
   };
 
@@ -256,7 +330,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       dataIndex: 'tags',
       render: (_, { tags }) => (
         <>
-          {tags.map(tag => {
+          {tags.map((tag) => {
             let color = tag === 'Completo' ? 'green' : 'red';
             return (
               <Tag color={color} key={tag}>
@@ -274,6 +348,8 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         <EditDelete
           allowEdit
           onEdit={() => handleEdit(record)}
+          allowCertificate
+          onCertificate={() => handleCertificate(record)}
           showDetail
           onDetail={() => handleDetail(record)}
         />
@@ -320,7 +396,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
   return (
     <>
       <Table
-        className='tables-wise'
+        className="tables-wise"
         columns={columns}
         dataSource={data}
         pagination={false}
@@ -344,7 +420,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         }
       >
         <Table
-          className='tables-wise'
+          className="tables-wise"
           columns={punchColumns}
           dataSource={detailData}
           pagination={false}
@@ -382,6 +458,94 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
           </Select>
         </Modal>
       )}
+
+      {/* Modal de Atestado */}
+      <Modal
+        title="Adicionar Atestado"
+        visible={isCertificateModalVisible}
+        onCancel={() => setIsCertificateModalVisible(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setIsCertificateModalVisible(false)}>
+            Cancelar
+          </Button>,
+          <Button key="submit" type="primary" onClick={submitCertificate}>
+            Enviar
+          </Button>,
+        ]}
+      >
+        <Form layout="vertical">
+          <Form.Item label="Data de Início">
+            <DatePicker
+              style={{ width: '100%' }}
+              value={certificateData.startDate}
+              onChange={(date) =>
+                setCertificateData({ ...certificateData, startDate: date })
+              }
+            />
+          </Form.Item>
+          <Form.Item label="Data de Fim">
+            <DatePicker
+              style={{ width: '100%' }}
+              value={certificateData.endDate}
+              onChange={(date) =>
+                setCertificateData({ ...certificateData, endDate: date })
+              }
+            />
+          </Form.Item>
+          <Form.Item label="Anexar Foto do Atestado">
+            <Upload
+              beforeUpload={(file) => {
+                const isImage =
+                  file.type === 'image/jpeg' ||
+                  file.type === 'image/png' ||
+                  file.type === 'image/jpg';
+
+                if (!isImage) {
+                  message.error('Você só pode fazer upload de arquivos JPG/PNG.');
+                  return Upload.LIST_IGNORE;
+                }
+
+                const maxFileSize = 5 * 1024 * 1024; 
+                if (file.size > maxFileSize) {
+                  message.error('O tamanho da imagem não pode exceder 5 MB.');
+                  return Upload.LIST_IGNORE;
+                }
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                  setCertificateData({
+                    ...certificateData,
+                    photo: file,
+                    imageBase64: reader.result as string,
+                  });
+                };
+                reader.onerror = () => {
+                  message.error('Erro ao ler o arquivo.');
+                };
+
+                return false; 
+              }}
+              fileList={certificateData.photo ? [certificateData.photo] : []}
+              onRemove={() =>
+                setCertificateData({ ...certificateData, photo: null, imageBase64: '' })
+              }
+            >
+              <Button icon={<UploadOutlined />}>Clique para Anexar</Button>
+            </Upload>
+          </Form.Item>
+          <Form.Item label="Justificativa">
+            <Input.TextArea
+              rows={4}
+              value={certificateData.justification}
+              onChange={(e) =>
+                setCertificateData({ ...certificateData, justification: e.target.value })
+              }
+              placeholder="Descreva o motivo do atestado."
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   );
 };
