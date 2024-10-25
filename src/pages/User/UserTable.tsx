@@ -101,7 +101,6 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
     },
   };
 
-  if (loading) return <p>Carregando...</p>;
   if (error) return <p>{error}</p>;
 
   return (
@@ -111,6 +110,7 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
       scroll={{ y: 400 }}
       columns={columns}
       dataSource={users}
+      loading={loading}
       rowSelection={{
         type: 'checkbox',
         ...rowSelection,

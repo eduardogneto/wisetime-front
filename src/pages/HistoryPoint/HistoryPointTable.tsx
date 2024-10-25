@@ -311,23 +311,27 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       title: 'Data',
       dataIndex: 'date',
       key: 'date',
+      align: 'center',
     },
     {
       title: 'Entradas',
       dataIndex: 'entrys',
       key: 'entrys',
+      align: 'center',
       render: (text: number) => `${text} Entradas`,
     },
     {
       title: 'Saídas',
       dataIndex: 'outs',
       key: 'outs',
+      align: 'center',
       render: (text: number) => `${text} Saídas`,
     },
     {
       title: 'Tags',
       key: 'tags',
       dataIndex: 'tags',
+      align: 'center',
       render: (_, { tags }) => (
         <>
           {tags.map((tag) => {
@@ -344,6 +348,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
     {
       title: 'Ação',
       key: 'action',
+      align: 'center',
       render: (_, record) => (
         <EditDelete
           allowEdit

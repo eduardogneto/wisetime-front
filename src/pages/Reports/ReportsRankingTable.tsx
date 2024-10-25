@@ -93,6 +93,7 @@ interface DataType {
         title: 'Usuário',
         dataIndex: 'user',
         key: 'user',
+        align: 'center',
         render: (text: string) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginRight: 15 }}>
@@ -106,11 +107,19 @@ interface DataType {
         title: 'Horas',
         dataIndex: 'hours',
         key: 'hours',
+        align: 'center',
+        render: (text: string) => {
+          const isNegative = text.startsWith('-');
+          return (
+            <span style={{ color: isNegative ? 'red' : 'green' }}>{text}</span>
+          );
+        }
       },
       {
         title: 'Tags',
         key: 'tags',
         dataIndex: 'tags',
+        align: 'center',
         render: (_, { tags }) => (
           <>
             {tags.map(tag => {
