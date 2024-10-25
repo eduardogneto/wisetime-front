@@ -15,6 +15,7 @@ export default function Header() {
   const [selectedKeys, setSelectedKeys] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+  const perm = localStorage.getItem('tag'); 
 
   const items = [
     {
@@ -29,7 +30,7 @@ export default function Header() {
       label: 'Histórico de Ponto',
       path: '/historypoint'
     },
-    {
+    ...(perm === 'COORDENADOR' || perm === 'ADMINISTRADOR' ? [{
       key: 'sub1',
       label: 'Painel de Gestor',
       icon: <DesktopOutlined />,
@@ -54,18 +55,18 @@ export default function Header() {
           label: 'Relatórios',
           path: '/management/reports'
         },
-        {
+        ...(perm === 'ADMINISTRADOR' ? [{
           key: '7',
           label: 'Times e Organizações',
           path: '/management/organization'
-        },
-        {
+        }] : []),
+        ...(perm === 'ADMINISTRADOR' ? [{
           key: '8',
           label: 'Auditoria',
           path: '/management/audit'
-        },
+        }] : []),
       ],
-    },
+    }] : []),
     {
       key: '9',
       icon: <ImportOutlined />,
