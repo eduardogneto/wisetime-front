@@ -40,6 +40,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<DataType | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const userId = localStorage.getItem('id');
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -150,6 +151,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
 
     try {
       await api.post(`/api/request/${selectedRequest.key}/approve`, {
+        userId,
         status: 'APROVADO',
       });
       message.success('Solicitação aprovada com sucesso!');
@@ -166,6 +168,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
 
     try {
       await api.post(`/api/request/${selectedRequest.key}/approve`, {
+        userId,
         status: 'REPROVADO',
       });
       message.success('Solicitação reprovada com sucesso!');
@@ -182,6 +185,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
       title: 'Solicitante',
       dataIndex: 'applicant',
       key: 'applicant',
+      align: 'center',
       render: (text: string) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginRight: 15 }}>
@@ -195,6 +199,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
       title: 'Tipo',
       dataIndex: 'type',
       key: 'type',
+      align: 'center',
       render: (type: string) => {
         const formatType = (type: string) => {
           switch (type) {
@@ -219,6 +224,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
       title: 'Tags',
       key: 'tags',
       dataIndex: 'tags',
+      align: 'center',
       render: (_, { tags }) => (
         <>
           {tags.map(tag => {
