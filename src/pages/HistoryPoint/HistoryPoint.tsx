@@ -20,10 +20,7 @@ interface Period {
 
 const HistoryPoint: React.FC = () => {
   const [periods, setPeriods] = useState<Period[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState<{ start: string; end: string }>({
-    start: '',
-    end: '',
-  });
+  const [selectedPeriod, setSelectedPeriod] = useState<{ start: string; end: string } | null>(null);
   const [defaultValue, setDefaultValue] = useState<string | undefined>(undefined);
 
   const [balances, setBalances] = useState({
@@ -55,6 +52,7 @@ const HistoryPoint: React.FC = () => {
         start: period.startDate,
         end: period.endDate,
       });
+      setDefaultValue(value);
     }
   };
 
@@ -67,10 +65,15 @@ const HistoryPoint: React.FC = () => {
 
       const response = await api.get(`/api/dueDateBank/periods/${organizationId}`);
 
-      setPeriods(response.data);
+      // Ordena os períodos por data de término em ordem decrescente
+      const sortedPeriods = response.data.sort((a: Period, b: Period) => {
+        return dayjs(b.endDate).valueOf() - dayjs(a.endDate).valueOf();
+      });
 
-      if (response.data.length > 0) {
-        const firstPeriod = response.data[0];
+      setPeriods(sortedPeriods);
+
+      if (sortedPeriods.length > 0) {
+        const firstPeriod = sortedPeriods[0];
         setSelectedPeriod({
           start: firstPeriod.startDate,
           end: firstPeriod.endDate,
@@ -197,7 +200,7 @@ const HistoryPoint: React.FC = () => {
               <TopButtons />
             </div>
           </div>
-          <HistoryPointTable selectedPeriod={selectedPeriod} />
+          {selectedPeriod && <HistoryPointTable selectedPeriod={selectedPeriod} />}
         </div>
       </div>
     </div>
