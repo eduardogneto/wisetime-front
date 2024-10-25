@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ColumnsType } from 'antd/es/table';
-import { Table, Tag, Avatar, message, Modal, List, Button } from 'antd';
+import {
+  Table,
+  Tag,
+  Avatar,
+  message,
+  Modal,
+  List,
+  Button,
+} from 'antd';
 import EditDelete from '../../components/EditDelete/EditDelete.tsx';
 import api from '../../connection/api';
 import dayjs from 'dayjs';
@@ -42,20 +50,26 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const userId = localStorage.getItem('id');
 
+  const [approving, setApproving] = useState<boolean>(false);
+  const [rejecting, setRejecting] = useState<boolean>(false);
+
   const fetchRequests = async () => {
     setLoading(true);
     try {
       const teamString = localStorage.getItem('team');
-      let teamId;
+      let teamId: number | undefined;
       if (teamString) {
         try {
           const team = JSON.parse(teamString);
           teamId = team.id;
         } catch (error) {
           console.error('Erro ao analisar o JSON:', error);
+          message.error('Erro ao processar os dados da equipe.');
+          return;
         }
       } else {
-        console.log('Nenhum item "team" encontrado no localStorage.');
+        message.error('Nenhum item "team" encontrado no localStorage.');
+        return;
       }
 
       const typeMapping: { [key: string]: string } = {
@@ -99,6 +113,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
       }));
       setData(fetchedData);
     } catch (error) {
+      console.error('Erro ao buscar as solicitações', error);
       message.error('Erro ao buscar as solicitações');
     } finally {
       setLoading(false);
@@ -130,6 +145,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
         const imageUrl = URL.createObjectURL(imageBlob);
         setImageSrc(imageUrl);
       } catch (error) {
+        console.error('Erro ao buscar a imagem do atestado', error);
         message.error('Erro ao buscar a imagem do atestado');
       }
     } else {
@@ -149,6 +165,8 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
   const approveRequest = async () => {
     if (!selectedRequest) return;
 
+    setApproving(true); 
+
     try {
       await api.post(`/api/request/${selectedRequest.key}/approve`, {
         userId,
@@ -159,12 +177,17 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
       fetchRequests();
       onActionCompleted();
     } catch (error) {
+      console.error('Erro ao aprovar a solicitação', error);
       message.error('Erro ao aprovar a solicitação');
+    } finally {
+      setApproving(false); 
     }
   };
 
   const rejectRequest = async () => {
     if (!selectedRequest) return;
+
+    setRejecting(true); 
 
     try {
       await api.post(`/api/request/${selectedRequest.key}/approve`, {
@@ -176,7 +199,10 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
       fetchRequests();
       onActionCompleted();
     } catch (error) {
+      console.error('Erro ao reprovar a solicitação', error);
       message.error('Erro ao reprovar a solicitação');
+    } finally {
+      setRejecting(false); 
     }
   };
 
@@ -279,10 +305,20 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
           onCancel={handleModalClose}
           footer={
             selectedRequest.status === 'PENDENTE' && [
-              <Button key="reject" onClick={rejectRequest} danger>
+              <Button
+                key="reject"
+                onClick={rejectRequest}
+                type='dashed'
+                danger
+              >
                 Reprovar
               </Button>,
-              <Button key="approve" type="primary" onClick={approveRequest}>
+              <Button
+                key="approve"
+                type="primary"
+                onClick={approveRequest}
+                loading={approving} 
+              >
                 Aprovar
               </Button>,
             ]
@@ -315,7 +351,7 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
 
           {selectedRequest.type === 'ATESTADO' && selectedRequest.certificate && (
             <>
-              <h4 className={'certificate-title'}>Data de Inicio</h4>
+              <h4 className={'certificate-title'}>Data de Início</h4>
               <div className={'container-punchs'}>
                 <span className={'list-item-description'}>
                   {dayjs(selectedRequest.certificate.startDate).format('DD/MM/YYYY')}

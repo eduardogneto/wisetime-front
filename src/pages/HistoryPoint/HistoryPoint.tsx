@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Select, message } from 'antd';
-import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
-import Header from '../../components/Header';
-import HistoryPointTable from './HistoryPointTable.tsx';
-import { TopButtons } from '../../components/TopButtons/TopButtons.tsx';
-import api from '../../connection/api';
+import { Select, Spin, message, Skeleton } from 'antd';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
+import React, { useEffect, useState } from 'react';
+import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
+import Header from '../../components/Header';
+import { TopButtons } from '../../components/TopButtons/TopButtons.tsx';
+import api from '../../connection/api';
+import HistoryPointTable from './HistoryPointTable.tsx';
+import { LoadingOutlined } from '@ant-design/icons';
+import './style.sass';
 
 dayjs.extend(isBetween);
 
@@ -20,7 +22,10 @@ interface Period {
 
 const HistoryPoint: React.FC = () => {
   const [periods, setPeriods] = useState<Period[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState<{ start: string; end: string } | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<{ start: string; end: string }>({
+    start: '',
+    end: '',
+  });
   const [defaultValue, setDefaultValue] = useState<string | undefined>(undefined);
 
   const [balances, setBalances] = useState({
@@ -29,7 +34,7 @@ const HistoryPoint: React.FC = () => {
     totalBalance: '+00:00',
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); 
 
   const getPeriodStatus = (startDate: string, endDate: string): string => {
     const today = dayjs();
@@ -52,7 +57,6 @@ const HistoryPoint: React.FC = () => {
         start: period.startDate,
         end: period.endDate,
       });
-      setDefaultValue(value);
     }
   };
 
@@ -65,7 +69,6 @@ const HistoryPoint: React.FC = () => {
 
       const response = await api.get(`/api/dueDateBank/periods/${organizationId}`);
 
-      // Ordena os períodos por data de término em ordem decrescente
       const sortedPeriods = response.data.sort((a: Period, b: Period) => {
         return dayjs(b.endDate).valueOf() - dayjs(a.endDate).valueOf();
       });
@@ -87,7 +90,6 @@ const HistoryPoint: React.FC = () => {
   };
 
   const fetchBalances = async () => {
-    setLoading(true);
     try {
       let userId = localStorage.getItem('id');
       let organizationId = localStorage.getItem('organizationId');
@@ -104,14 +106,16 @@ const HistoryPoint: React.FC = () => {
     } catch (error) {
       console.error('Erro ao buscar os saldos:', error);
       message.error('Erro ao buscar os saldos');
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPeriods();
-    fetchBalances(); // Buscar os saldos ao carregar o componente
+    const fetchData = async () => {
+      setLoading(true);
+      await Promise.all([fetchPeriods(), fetchBalances()]);
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
   const formatBalance = (balance: string) => {
@@ -123,84 +127,94 @@ const HistoryPoint: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="history-point-container">
       <Header />
       <div className='container-user'>
         <div className='table'>
           <Breadcrumb />
-          <div className='containers-balance'>
-            <div className='balance-point'>
-              <p className='top-point-balace'>Saldo Anterior</p>
-              <p className='low-point-balace'>
-                {
-                  (() => {
-                    const { symbol, formattedTime } = formatBalance(balances.previousPeriodBalance);
-                    return (
-                      <>
-                        <span className='pink'>{symbol}</span>
-                        <span>{formattedTime}</span>
-                      </>
-                    );
-                  })()
-                }
-              </p>
+          {loading ? (
+            <div className="skeleton-wrapper">
+              <Skeleton active paragraph={{ rows: 4 }} title />
+              <Skeleton.Button active size="large" block style={{ marginTop: 20 }} />
+              <Skeleton active paragraph={{ rows: 10 }} title />
             </div>
-            <div className='balance-point'>
-              <p className='top-point-balace'>Saldo Período</p>
-              <p className='low-point-balace'>
-                {
-                  (() => {
-                    const { symbol, formattedTime } = formatBalance(balances.currentPeriodBalance);
-                    return (
-                      <>
-                        <span className='pink'>{symbol}</span>
-                        <span>{formattedTime}</span>
-                      </>
-                    );
-                  })()
-                }
-              </p>
-            </div>
-            <div className='balance-point'>
-              <p className='top-point-balace'>Saldo Geral</p>
-              <p className='low-point-balace'>
-                {
-                  (() => {
-                    const { symbol, formattedTime } = formatBalance(balances.totalBalance);
-                    return (
-                      <>
-                        <span className='pink'>{symbol}</span>
-                        <span>{formattedTime}</span>
-                      </>
-                    );
-                  })()
-                }
-              </p>
-            </div>
-          </div>
-          <p style={{ marginLeft: 10 }}>Período</p>
-          <div className='filters-history'>
-            <div className='left-filters'>
-              <Select
-                onChange={handleChange}
-                className='select'
-                placeholder="Selecione o Período"
-                value={defaultValue}
-                style={{ width: 250 }}
-                loading={periods.length === 0}
-              >
-                {periods.map(period => (
-                  <Option key={period.id} value={period.id.toString()}>
-                    {`${dayjs(period.startDate).format('DD/MM/YYYY')} - ${dayjs(period.endDate).format('DD/MM/YYYY')}${getPeriodStatus(period.startDate, period.endDate)}`}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-            <div className='right-filters'>
-              <TopButtons />
-            </div>
-          </div>
-          {selectedPeriod && <HistoryPointTable selectedPeriod={selectedPeriod} />}
+          ) : (
+            <>
+              <div className='containers-balance'>
+                <div className='balance-point'>
+                  <p className='top-point-balace'>Saldo Anterior</p>
+                  <p className='low-point-balace'>
+                    {
+                      (() => {
+                        const { symbol, formattedTime } = formatBalance(balances.previousPeriodBalance);
+                        return (
+                          <>
+                            <span className='pink'>{symbol}</span>
+                            <span>{formattedTime}</span>
+                          </>
+                        );
+                      })()
+                    }
+                  </p>
+                </div>
+                <div className='balance-point'>
+                  <p className='top-point-balace'>Saldo Período</p>
+                  <p className='low-point-balace'>
+                    {
+                      (() => {
+                        const { symbol, formattedTime } = formatBalance(balances.currentPeriodBalance);
+                        return (
+                          <>
+                            <span className='pink'>{symbol}</span>
+                            <span>{formattedTime}</span>
+                          </>
+                        );
+                      })()
+                    }
+                  </p>
+                </div>
+                <div className='balance-point'>
+                  <p className='top-point-balace'>Saldo Geral</p>
+                  <p className='low-point-balace'>
+                    {
+                      (() => {
+                        const { symbol, formattedTime } = formatBalance(balances.totalBalance);
+                        return (
+                          <>
+                            <span className='pink'>{symbol}</span>
+                            <span>{formattedTime}</span>
+                          </>
+                        );
+                      })()
+                    }
+                  </p>
+                </div>
+              </div>
+              <p style={{ marginLeft: 10 }}>Período</p>
+              <div className='filters-history'>
+                <div className='left-filters'>
+                  <Select
+                    onChange={handleChange}
+                    className='select'
+                    placeholder="Selecione o Período"
+                    value={defaultValue}
+                    style={{ width: 250 }}
+                    loading={periods.length === 0}
+                  >
+                    {periods.map(period => (
+                      <Option key={period.id} value={period.id.toString()}>
+                        {`${dayjs(period.startDate).format('DD/MM/YYYY')} - ${dayjs(period.endDate).format('DD/MM/YYYY')}${getPeriodStatus(period.startDate, period.endDate)}`}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+                <div className='right-filters'>
+                  <TopButtons />
+                </div>
+              </div>
+              <HistoryPointTable selectedPeriod={selectedPeriod} />
+            </>
+          )}
         </div>
       </div>
     </div>

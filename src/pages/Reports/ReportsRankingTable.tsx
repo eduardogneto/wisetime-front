@@ -17,7 +17,6 @@ interface DataType {
   const ReportsRankingTable: React.FC = () => {
     const [data, setData] = useState<DataType[]>([]);
   
-    // Função para formatar o tempo
     const formatTime = (seconds: number) => {
       const isNegative = seconds < 0;
       const absoluteSeconds = Math.abs(seconds);

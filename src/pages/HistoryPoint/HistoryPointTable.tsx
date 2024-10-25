@@ -70,6 +70,10 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
     justification: '',
   });
 
+  const [sendingJustification, setSendingJustification] = useState<boolean>(false);
+  const [sendingCertificate, setSendingCertificate] = useState<boolean>(false);
+  const [addingPunch, setAddingPunch] = useState<boolean>(false);
+
   const getDatesInRange = (start: string, end: string) => {
     const startDate = dayjs(start);
     const endDate = dayjs(end);
@@ -158,15 +162,22 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
     }
   };
 
-  const addNewPunch = () => {
-    const newPunch: DetailData = {
-      id: (Math.random() * 1000).toString(),
-      status: 'Entrada',
-      hours: '',
-      editable: true,
-    };
-    setDetailData([...detailData, newPunch]);
-    setAddedPunches([...addedPunches, newPunch]);
+  const addNewPunch = async () => {
+    try {
+      setAddingPunch(true); 
+      const newPunch: DetailData = {
+        id: (Math.random() * 1000).toString(),
+        status: 'Entrada',
+        hours: '',
+        editable: true,
+      };
+      setDetailData([...detailData, newPunch]);
+      setAddedPunches([...addedPunches, newPunch]);
+    } catch (error) {
+      message.error('Erro ao adicionar nova batida.');
+    } finally {
+      setAddingPunch(false);
+    }
   };
 
   const handleEdit = (record: DetailData) => {
@@ -214,6 +225,8 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         return;
       }
 
+      setSendingJustification(true); 
+
       const id = localStorage.getItem('id');
 
       const date = dayjs(selectedDate, 'DD/MM/YYYY').format('YYYY-MM-DD');
@@ -224,7 +237,6 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         justification,
         punches: addedPunches.map((punch) => {
           const fullDateTime = `${date}T${punch.hours}:00`;
-
           return {
             status: punch.status,
             hours: fullDateTime,
@@ -237,6 +249,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       );
       if (hasEmptyTime) {
         message.error('Há horários vazios. Por favor, preencha antes de enviar.');
+        setSendingJustification(false); 
         return;
       }
 
@@ -248,6 +261,8 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       setJustification('');
     } catch (error) {
       message.error('Erro ao enviar a solicitação.');
+    } finally {
+      setSendingJustification(false); 
     }
   };
 
@@ -268,6 +283,8 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
     }
 
     try {
+      setSendingCertificate(true); 
+
       const id = localStorage.getItem('id');
 
       const requestPayload = {
@@ -294,6 +311,8 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       setIsCertificateModalVisible(false);
     } catch (error) {
       message.error('Erro ao enviar o atestado.');
+    } finally {
+      setSendingCertificate(false); 
     }
   };
 
@@ -398,7 +417,8 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
 
   return (
     <>
-      <Table style={{ maxHeight: '480px', overflowY: 'auto'}}
+      <Table
+        style={{ maxHeight: '480px', overflowY: 'auto' }}
         className="tables-wise"
         columns={columns}
         dataSource={data}
@@ -412,10 +432,15 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         onCancel={() => setIsModalVisible(false)}
         footer={
           <>
-            <Button onClick={addNewPunch} type="primary">
+            <Button onClick={addNewPunch} type="primary" loading={addingPunch}>
               Nova Batida
             </Button>
-            <Button onClick={sendRequest} type="primary">
+            <Button
+              onClick={sendRequest}
+              type="primary"
+              loading={sendingJustification}
+              disabled={loading}
+            >
               Enviar Justificativa
             </Button>
             <Button onClick={() => setIsModalVisible(false)}>Fechar</Button>
@@ -471,7 +496,12 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
           <Button key="cancel" onClick={() => setIsCertificateModalVisible(false)}>
             Cancelar
           </Button>,
-          <Button key="submit" type="primary" onClick={submitCertificate}>
+          <Button
+            key="submit"
+            type="primary"
+            onClick={submitCertificate}
+            loading={sendingCertificate}
+          >
             Enviar
           </Button>,
         ]}

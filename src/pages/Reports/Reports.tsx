@@ -4,56 +4,63 @@ import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
 import Header from '../../components/Header/index.js';
 import ReportsRankingTable from './ReportsRankingTable.tsx';
 import api from '../../connection/api.js';
+import { Skeleton, message } from 'antd';
 
 const Reports: React.FC = () => {
     const [positiveHours, setPositiveHours] = useState<number>(0);
     const [negativeHours, setNegativeHours] = useState<number>(0);
     const [totalHours, setTotalHours] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(true); 
 
     const teamString = localStorage.getItem('team');
-      if (teamString) {
+    let teamId: number | undefined;
+
+    if (teamString) {
         try {
             const team = JSON.parse(teamString);
-            var teamId = team.id;
+            teamId = team.id;
         } catch (error) {
             console.error('Erro ao analisar o JSON:', error);
+            message.error('Erro ao analisar os dados da equipe.');
         }
-      }
+    }
 
     useEffect(() => {
-        const fetchPositiveHours = async () => {
+        const fetchData = async () => {
+            if (!teamId) {
+                message.error('ID da equipe não encontrado.');
+                setLoading(false);
+                return;
+            }
+
             try {
-                const response = await api.get(`/api/reports/getPositiveHours/${teamId}`);
-                setPositiveHours(response.data);
+                setLoading(true); 
+
+                const fetchPositiveHours = api.get(`/api/reports/getPositiveHours/${teamId}`);
+                const fetchNegativeHours = api.get(`/api/reports/getNegativeHours/${teamId}`);
+                const fetchTotalHours = api.get(`/api/reports/getAllHours/${teamId}`);
+
+                const [positiveRes, negativeRes, totalRes] = await Promise.all([
+                    fetchPositiveHours,
+                    fetchNegativeHours,
+                    fetchTotalHours,
+                ]);
+
+                setPositiveHours(positiveRes.data);
+                setNegativeHours(negativeRes.data);
+                setTotalHours(totalRes.data);
             } catch (error) {
-                console.error('Erro ao buscar horas positivas:', error);
+                console.error('Erro ao buscar dados dos relatórios:', error);
+                message.error('Erro ao buscar dados dos relatórios.');
+            } finally {
+                setLoading(false);
             }
         };
 
-        const fetchNegativeHours = async () => {
-            try {
-                const response = await api.get(`/api/reports/getNegativeHours/${teamId}`);
-                setNegativeHours(response.data);
-            } catch (error) {
-                console.error('Erro ao buscar horas negativas:', error);
-            }
-        };
-
-        const fetchTotalHours = async () => {
-            try {
-                const response = await api.get(`/api/reports/getAllHours/${teamId}`);
-                setTotalHours(response.data);
-            } catch (error) {
-                console.error('Erro ao buscar total de horas:', error);
-            }
-        };
-
-        fetchPositiveHours();
-        fetchNegativeHours();
-        fetchTotalHours();
+        fetchData();
     }, [teamId]);
 
-    const formatTime = (seconds) => {
+    const formatTime = (seconds: number) => {
         const isNegative = seconds < 0;
         const absoluteSeconds = Math.abs(seconds);
 
@@ -76,29 +83,49 @@ const Reports: React.FC = () => {
                 <div className="table">
                     <Breadcrumb />
                     <div className='containers-balance'>
-                        <div className='balance-point'>
-                            <p className='top-point-balace'>Usuários com horas extras</p>
-                            <p className='low-point-balace'>
-                                <span>{positiveHours}</span>
-                            </p>
-                        </div>
-                        <div className='balance-point'>
-                            <p className='top-point-balace'>Usuários com horas negativas</p>
-                            <p className='low-point-balace'>
-                                <span>{negativeHours}</span>
-                            </p>
-                        </div>
-                        <div className='balance-point'>
-                            <p className='top-point-balace'>Total de horas do time</p>
-                            <p className='low-point-balace'>
-                                <span>
-                                    <span className='pink'>{formattedTotalHours.sign}</span>
-                                    {formattedTotalHours.time}
-                                </span>
-                            </p>
-                        </div>
+                        {loading ? (
+                            <>
+                                <div className='balance-point'>
+                                    <Skeleton.Input active  />
+                                </div>
+                                <div className='balance-point'>
+                                    <Skeleton.Input active  />
+                                </div>
+                                <div className='balance-point'>
+                                    <Skeleton.Input active  />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className='balance-point'>
+                                    <p className='top-point-balace'>Usuários com horas extras</p>
+                                    <p className='low-point-balace'>
+                                        <span>{positiveHours}</span>
+                                    </p>
+                                </div>
+                                <div className='balance-point'>
+                                    <p className='top-point-balace'>Usuários com horas negativas</p>
+                                    <p className='low-point-balace'>
+                                        <span>{negativeHours}</span>
+                                    </p>
+                                </div>
+                                <div className='balance-point'>
+                                    <p className='top-point-balace'>Total de horas do time</p>
+                                    <p className='low-point-balace'>
+                                        <span>
+                                            <span className='pink'>{formattedTotalHours.sign}</span>
+                                            {formattedTotalHours.time}
+                                        </span>
+                                    </p>
+                                </div>
+                            </>
+                        )}
                     </div>
-                    <ReportsRankingTable />
+                    {loading ? (
+                        <Skeleton active paragraph={{ rows: 10 }} />
+                    ) : (
+                        <ReportsRankingTable />
+                    )}
                 </div>
             </div>
         </div>
