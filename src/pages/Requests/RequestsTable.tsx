@@ -254,8 +254,8 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
         <EditDelete
           showDetail
           onDetail={() => showDetailModal(record)}
-          allowDelete={false} 
-          allowEdit={false} 
+          allowDelete={false}
+          allowEdit={false}
         />
       ),
     },
@@ -290,17 +290,24 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
         >
           {selectedRequest.type === 'ADICAO_DE_PONTO' && (
             <>
-              <h4>Pontos Inseridos</h4>
-              <h3>Justificativa: {selectedRequest.justification || 'Não informada'}</h3>
+              <h4 className={'punch-title'}>Justificativa</h4>
+              <div className={'container-punchs'}>
+                <span className={'list-item-description'}>
+                  {selectedRequest.justification || 'Não informada'}
+                </span>
+              </div>
+              <h4 className={'punch-title'}>Pontos Inseridos</h4>
               <List
                 dataSource={selectedRequest.punches || []}
                 renderItem={punch => (
-                  <List.Item>
-                    <List.Item.Meta
-                      title={punch.status === 'ENTRY' ? 'Entrada' : 'Saída'}
-                      description={`Horário: ${dayjs(punch.hours).format('HH:mm')}`}
-                    />
-                  </List.Item>
+                  <div className={'punch-container'}>
+                    <List.Item>
+                      <List.Item.Meta
+                        title={<span className={'list-item-title'}>{punch.status === 'ENTRY' ? 'Entrada' : 'Saída'}</span>}
+                        description={<span className={'list-item-description'}>{`Horário: ${dayjs(punch.hours).format('HH:mm')}`}</span>}
+                      />
+                    </List.Item>
+                  </div>
                 )}
               />
             </>
@@ -308,14 +315,28 @@ const RequestTable: React.FC<RequestTableProps> = ({ filters, onActionCompleted 
 
           {selectedRequest.type === 'ATESTADO' && selectedRequest.certificate && (
             <>
-              <h4>Dados do Atestado</h4>
-              <p>Data de Início: {dayjs(selectedRequest.certificate.startDate).format('DD/MM/YYYY')}</p>
-              <p>Data de Fim: {dayjs(selectedRequest.certificate.endDate).format('DD/MM/YYYY')}</p>
-              <p>Justificativa: {selectedRequest.justification || 'Não informada'}</p>
+              <h4 className={'certificate-title'}>Data de Inicio</h4>
+              <div className={'container-punchs'}>
+                <span className={'list-item-description'}>
+                  {dayjs(selectedRequest.certificate.startDate).format('DD/MM/YYYY')}
+                </span>
+              </div>
+              <h4 className={'certificate-title'}>Data de Fim</h4>
+              <div className={'container-punchs'}>
+                <span className={'list-item-description'}>
+                  {dayjs(selectedRequest.certificate.endDate).format('DD/MM/YYYY')}
+                </span>
+              </div>
+              <h4 className={'punch-title'}>Justificativa</h4>
+              <div className={'container-punchs'}>
+                <span className={'list-item-description'}>
+                  {selectedRequest.justification || 'Não informada'}
+                </span>
+              </div>
               {imageSrc && (
-                <div>
-                  <h4>Imagem do Atestado</h4>
-                  <img src={imageSrc} alt="Atestado" style={{ maxWidth: '100%' }} />
+                <div className={'image-container'}>
+                  <h4 className={'certificate-title'}>Imagem do Atestado</h4>
+                  <img src={imageSrc} alt="Atestado" className={'image'} />
                 </div>
               )}
             </>
