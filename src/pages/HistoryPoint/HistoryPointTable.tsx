@@ -351,8 +351,6 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       align: 'center',
       render: (_, record) => (
         <EditDelete
-          allowEdit
-          onEdit={() => handleEdit(record)}
           allowCertificate
           onCertificate={() => handleCertificate(record)}
           showDetail
@@ -371,7 +369,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         record.editable ? (
           <Select
             value={record.status}
-            onChange={(value) => confirmEditPunch(value)}
+            onChange={(value) => updatePunch(record.id, 'status', value)}
             style={{ width: '100%' }}
           >
             <Option value="Entrada">Entrada</Option>
