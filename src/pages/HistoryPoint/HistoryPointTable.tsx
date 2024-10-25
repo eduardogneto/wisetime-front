@@ -398,7 +398,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
 
   return (
     <>
-      <Table
+      <Table style={{ maxHeight: '480px', overflowY: 'auto'}}
         className="tables-wise"
         columns={columns}
         dataSource={data}

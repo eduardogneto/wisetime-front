@@ -6,16 +6,16 @@ import HistoryPointTable from './HistoryPointTable.tsx';
 import { TopButtons } from '../../components/TopButtons/TopButtons.tsx';
 import api from '../../connection/api';
 import dayjs from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween'; 
+import isBetween from 'dayjs/plugin/isBetween';
 
-dayjs.extend(isBetween); 
+dayjs.extend(isBetween);
 
 const { Option } = Select;
 
 interface Period {
   id: number;
-  startDate: string; 
-  endDate: string; 
+  startDate: string;
+  endDate: string;
 }
 
 const HistoryPoint: React.FC = () => {
@@ -25,6 +25,14 @@ const HistoryPoint: React.FC = () => {
     end: '',
   });
   const [defaultValue, setDefaultValue] = useState<string | undefined>(undefined);
+
+  const [balances, setBalances] = useState({
+    currentPeriodBalance: '+00:00',
+    previousPeriodBalance: '+00:00',
+    totalBalance: '+00:00',
+  });
+
+  const [loading, setLoading] = useState(false);
 
   const getPeriodStatus = (startDate: string, endDate: string): string => {
     const today = dayjs();
@@ -67,7 +75,7 @@ const HistoryPoint: React.FC = () => {
           start: firstPeriod.startDate,
           end: firstPeriod.endDate,
         });
-        setDefaultValue(firstPeriod.id.toString()); 
+        setDefaultValue(firstPeriod.id.toString());
       }
     } catch (error) {
       console.error('Erro ao buscar os períodos:', error);
@@ -75,9 +83,41 @@ const HistoryPoint: React.FC = () => {
     }
   };
 
+  const fetchBalances = async () => {
+    setLoading(true);
+    try {
+      let userId = localStorage.getItem('id');
+      let organizationId = localStorage.getItem('organizationId');
+
+      if (!userId || !organizationId) {
+        throw new Error('Usuário ou organização não encontrados.');
+      }
+
+      const response = await api.get(`/api/users/${userId}/balances`, {
+        params: { organizationId },
+      });
+
+      setBalances(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar os saldos:', error);
+      message.error('Erro ao buscar os saldos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchPeriods();
+    fetchBalances(); // Buscar os saldos ao carregar o componente
   }, []);
+
+  const formatBalance = (balance: string) => {
+    const symbol = balance.substring(0, 1);
+    const time = balance.substring(1);
+    const [hours, minutes] = time.split(':');
+    const formattedTime = `${hours}h${minutes}min`;
+    return { symbol, formattedTime };
+  };
 
   return (
     <div>
@@ -85,6 +125,56 @@ const HistoryPoint: React.FC = () => {
       <div className='container-user'>
         <div className='table'>
           <Breadcrumb />
+          <div className='containers-balance'>
+            <div className='balance-point'>
+              <p className='top-point-balace'>Saldo Anterior</p>
+              <p className='low-point-balace'>
+                {
+                  (() => {
+                    const { symbol, formattedTime } = formatBalance(balances.previousPeriodBalance);
+                    return (
+                      <>
+                        <span className='pink'>{symbol}</span>
+                        <span>{formattedTime}</span>
+                      </>
+                    );
+                  })()
+                }
+              </p>
+            </div>
+            <div className='balance-point'>
+              <p className='top-point-balace'>Saldo Período</p>
+              <p className='low-point-balace'>
+                {
+                  (() => {
+                    const { symbol, formattedTime } = formatBalance(balances.currentPeriodBalance);
+                    return (
+                      <>
+                        <span className='pink'>{symbol}</span>
+                        <span>{formattedTime}</span>
+                      </>
+                    );
+                  })()
+                }
+              </p>
+            </div>
+            <div className='balance-point'>
+              <p className='top-point-balace'>Saldo Geral</p>
+              <p className='low-point-balace'>
+                {
+                  (() => {
+                    const { symbol, formattedTime } = formatBalance(balances.totalBalance);
+                    return (
+                      <>
+                        <span className='pink'>{symbol}</span>
+                        <span>{formattedTime}</span>
+                      </>
+                    );
+                  })()
+                }
+              </p>
+            </div>
+          </div>
           <p style={{ marginLeft: 10 }}>Período</p>
           <div className='filters-history'>
             <div className='left-filters'>
@@ -92,7 +182,7 @@ const HistoryPoint: React.FC = () => {
                 onChange={handleChange}
                 className='select'
                 placeholder="Selecione o Período"
-                value={defaultValue} 
+                value={defaultValue}
                 style={{ width: 250 }}
                 loading={periods.length === 0}
               >
