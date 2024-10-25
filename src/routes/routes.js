@@ -8,6 +8,7 @@ import DueDateBank from '../pages/DueDateBank/DueDateBank.tsx';
 import Requests from '../pages/Requests/Requests.tsx';
 import Organization from '../pages/Organization/Organization.tsx';
 import Reports from '../pages/Reports/Reports.tsx';
+import Audit from '../pages/Audit/Audit.tsx';
 import ErrorPage from '../pages/ErrorPage.tsx';
 
 const ApplicationRoutes = () => {
@@ -38,6 +39,7 @@ const ApplicationRoutes = () => {
                 <Route path='/management/requests' element={<PrivateRoute><Requests /></PrivateRoute>} />
                 <Route path='/management/organization' element={<PrivateRoute><Organization /></PrivateRoute>} />
                 <Route path='/management/reports' element={<PrivateRoute><Reports /></PrivateRoute>} />
+                <Route path='/management/audit' element={<PrivateRoute><Audit /></PrivateRoute>} />
                 <Route path='/login' element={<PublicRoute><SignIn /></PublicRoute>} />
                 <Route path='*' element={<ErrorPage/>} />
             </Routes>

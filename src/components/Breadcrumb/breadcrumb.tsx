@@ -15,6 +15,7 @@ const BreadcrumbComponent: React.FC = () => {
         requests: 'Solicitações',
         organization: 'Times e Organizações',
         reports: 'Relatórios',
+        audit: 'Auditoria',
     };
 
     const menuItems = (

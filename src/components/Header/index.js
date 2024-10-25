@@ -104,6 +104,7 @@ export default function Header() {
       '5': () => navigate('/management/requests'),
       '6': () => navigate('/management/reports'),
       '7': () => navigate('/management/organization'),
+      '8': () => navigate('/management/audit'),
       '9': handleExit,
     };
 
