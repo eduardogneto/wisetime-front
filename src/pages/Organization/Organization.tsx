@@ -65,11 +65,14 @@ const Organization: React.FC = () => {
     );
   };
 
+  const userId = localStorage.getItem('id');
+
   const handleSubmit = () => {
     form
       .validateFields()
       .then(async (values) => {
         const organizationData = {
+          userId,
           name: values.name,
           taxId: values.taxId,
           email: values.email,

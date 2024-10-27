@@ -487,7 +487,6 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         </Modal>
       )}
 
-      {/* Modal de Atestado */}
       <Modal
         title="Adicionar Atestado"
         visible={isCertificateModalVisible}

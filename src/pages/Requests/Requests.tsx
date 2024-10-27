@@ -94,15 +94,12 @@ const Requests: React.FC = () => {
           <div className='containers-balance'>
             {loading ? (
               <>
-                {/* Skeleton para "Solicitações em aberto" */}
                 <div className='balance-point'>
                   <Skeleton active title={false} paragraph={{ rows: 1, width: '60%' }} />
                 </div>
-                {/* Skeleton para "Solicitações aprovadas" */}
                 <div className='balance-point'>
                   <Skeleton active title={false} paragraph={{ rows: 1, width: '60%' }} />
                 </div>
-                {/* Skeleton para "Solicitações reprovadas" */}
                 <div className='balance-point'>
                   <Skeleton active title={false} paragraph={{ rows: 1, width: '60%' }} />
                 </div>
