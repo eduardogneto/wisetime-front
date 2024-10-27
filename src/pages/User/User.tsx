@@ -25,6 +25,7 @@ const User: React.FC = () => {
   const [tag, setTag] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
+  const [refresh, setRefresh] = useState(0); 
   const organizationId = localStorage.getItem('organizationId');
 
   useEffect(() => {
@@ -51,33 +52,47 @@ const User: React.FC = () => {
     if (selectedUser) {
       setName(selectedUser.name);
       setEmail(selectedUser.email);
-      setTeamId(selectedUser.team?.id || null);  
+      setTeamId(selectedUser.team?.id || null);
       setTag(selectedUser.tag);
+      setPassword('');
     }
     setIsModalOpen(true);
   };
 
   const handleOk = async () => {
-    if (!email || !name || !password || !teamId || !tag) {
-      message.error('Por favor, preencha todos os campos!');
+    if (!email || !name || !teamId || !tag || (!selectedUser && !password)) {
+      message.error('Por favor, preencha todos os campos obrigatórios!');
       return;
     }
 
-    const userData = {
-      id: selectedUser?.id || null,
+    const userData: any = {
       email,
       name,
-      password,
       teamId,
       tag,
     };
 
+    if (!selectedUser || (selectedUser && password)) {
+      userData.password = password;
+    }
+
+    if (selectedUser && selectedUser.id) {
+      userData.id = selectedUser.id;
+    }
+
     try {
-      await api.post('/api/users/register', userData);
-      message.success(selectedUser?.id ? 'Usuário editado com sucesso!' : 'Usuário registrado com sucesso!');
+      if (selectedUser && selectedUser.id) {
+        await api.put(`/auth/users/${selectedUser.id}`, userData);
+        message.success('Usuário editado com sucesso!');
+      } else {
+        await api.post('/auth/register', userData);
+        message.success('Usuário registrado com sucesso!');
+      }
       setIsModalOpen(false);
       resetFormFields();
+      setRefresh(prev => prev + 1); 
     } catch (error) {
+      console.error(error);
       message.error('Erro ao registrar ou editar o usuário.');
     }
   };
@@ -132,7 +147,7 @@ const User: React.FC = () => {
               </div>
             </div>
           </div>
-          <UserTable onSelectUser={setSelectedUser} />
+          <UserTable onSelectUser={setSelectedUser} refresh={refresh} /> 
           <Modal
             className='modal'
             title={selectedUser ? "Editar usuário" : "Cadastrar novo usuário"}
@@ -150,11 +165,17 @@ const User: React.FC = () => {
             </div>
             <div className='input-modal'>
               <h4>Senha</h4>
-              <Input placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input
+                placeholder={selectedUser ? "Deixe em branco para manter a senha atual" : "Senha"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password" 
+              />
             </div>
             <div className='input-modal'>
               <h4>Cargo</h4>
               <Select
+                style={{ width: '100%' }}
                 placeholder="Selecione o cargo"
                 loading={loadingTeams}
                 value={teamId}
@@ -165,6 +186,7 @@ const User: React.FC = () => {
             <div className='input-modal'>
               <h4>Tag</h4>
               <Select
+                style={{ width: '100%' }}
                 placeholder="Selecione a tag"
                 value={tag}
                 onChange={(value) => setTag(value)}

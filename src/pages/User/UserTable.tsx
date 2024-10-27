@@ -13,6 +13,7 @@ interface UserResponseDTO {
 
 interface UserTableProps {
   onSelectUser: (user: UserResponseDTO | null) => void;
+  refresh: number; 
 }
 
 const getInitials = (applicant: string) => {
@@ -24,7 +25,7 @@ const getInitials = (applicant: string) => {
   return 'NN';
 };
 
-const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
+const UserTable: React.FC<UserTableProps> = ({ onSelectUser, refresh }) => {
   const [users, setUsers] = useState<UserResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,7 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
 
   const fetchUsers = async () => {
     try {
+      setLoading(true);
       const response = await api.get('/api/users/organization', {
         params: { organizationId },
       });
@@ -52,7 +54,7 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
       setError('Organization ID não encontrado.');
       setLoading(false);
     }
-  }, [organizationId]);
+  }, [organizationId, refresh]); 
 
   const columns = [
     {
@@ -69,7 +71,7 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
       ),
     },
     { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Time', dataIndex: ['team', 'name'], key: 'team' }, 
+    { title: 'Time', dataIndex: 'teamName', key: 'teamName' }, 
     {
       title: 'Tag',
       dataIndex: 'tag',
@@ -91,14 +93,16 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
   ];
 
   const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: UserResponseDTO[]) => {
-      setSelectedRowKeys(selectedRowKeys as number[]);
+    selectedRowKeys,
+    onChange: (selectedKeys: React.Key[], selectedRows: UserResponseDTO[]) => {
+      setSelectedRowKeys(selectedKeys as number[]);
       if (selectedRows.length === 1) {
         onSelectUser(selectedRows[0]);
       } else {
         onSelectUser(null);
       }
     },
+    type: 'checkbox', 
   };
 
   if (error) return <p>{error}</p>;
@@ -106,15 +110,13 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser }) => {
   return (
     <Table
       className='tables-wise'
+      rowKey="id" 
       pagination={false}
       scroll={{ y: 400 }}
       columns={columns}
       dataSource={users}
       loading={loading}
-      rowSelection={{
-        type: 'checkbox',
-        ...rowSelection,
-      }}
+      rowSelection={rowSelection}
     />
   );
 };
