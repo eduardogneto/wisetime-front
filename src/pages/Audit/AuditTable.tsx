@@ -9,9 +9,10 @@ import { CheckCircleOutlined, ClockCircleOutlined, SyncOutlined } from '@ant-des
 
 interface DataType {
     key: string;
-    period: string;
-    status: string[];
-    startDate: string;
+    name: string;       
+    action: string;
+    details: string;
+    date: string;
 }
 
 const AuditTable: React.FC = () => {
@@ -22,17 +23,26 @@ const AuditTable: React.FC = () => {
         const fetchDueDateBanks = async () => {
             try {
                 const teamString = localStorage.getItem('team');
+                let teamId: string | undefined;
+
                 if (teamString) {
                     try {
                         const team = JSON.parse(teamString);
-                        var teamId = team.id;
+                        teamId = team.id;
                     } catch (error) {
                         console.error('Erro ao analisar o JSON:', error);
                     }
                 }
 
+                if (!teamId) {
+                    message.warning('ID da equipe não encontrado.');
+                    setData([]);
+                    setLoading(false);
+                    return;
+                }
+
                 const response = await api.get(`/api/audit/logs/${teamId}`);
-                const responseData = response.data;
+                const responseData: DataType[] = response.data;
 
                 if (!responseData || responseData.length === 0) {
                     message.warning('Nenhuma auditoria encontrada.');
@@ -94,6 +104,7 @@ const AuditTable: React.FC = () => {
             dataIndex: 'date',
             key: 'date',
             align: 'center',
+            render: (text: string) => moment(text).format('DD/MM/YYYY'),
         },
     ];
 
