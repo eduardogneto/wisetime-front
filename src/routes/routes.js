@@ -14,19 +14,24 @@ import ErrorPage from '../pages/ErrorPage.tsx';
 const ApplicationRoutes = () => {
     const [signed, setSigned] = useState(false);
     const [userTag, setUserTag] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        const tag = localStorage.getItem('tag'); 
+        const tag = localStorage.getItem('tag');
+        
         if (token) {
             setSigned(true);
         }
         if (tag) {
             setUserTag(tag);
         }
+        setLoading(false); 
     }, []);
 
     const PrivateRoute = ({ children, requiresAdminOrCoordinator = false, requiresAdmin = false }) => {
+        if (loading) return null; 
+
         if (!signed) {
             return <Navigate to='/login' />;
         }
@@ -43,6 +48,7 @@ const ApplicationRoutes = () => {
     };
 
     const PublicRoute = ({ children }) => {
+        if (loading) return null; 
         return signed ? <Navigate to='/dashboard' /> : children;
     };
 
