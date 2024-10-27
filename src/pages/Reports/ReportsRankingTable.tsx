@@ -16,6 +16,7 @@ interface DataType {
 
   const ReportsRankingTable: React.FC = () => {
     const [data, setData] = useState<DataType[]>([]);
+    const [loading, setLoading] = useState(false);
   
     const formatTime = (seconds: number) => {
       const isNegative = seconds < 0;
@@ -43,6 +44,7 @@ interface DataType {
   
     useEffect(() => {
       const fetchData = async () => {
+        setLoading(true);
         try {
           const response = await api.get(`/api/reports/getUserBalances/${teamId}`);
           const userBalances = response.data;
@@ -72,6 +74,8 @@ interface DataType {
           setData(newData);
         } catch (error) {
           console.error('Erro ao buscar dados:', error);
+        } finally {
+          setLoading(false);
         }
       };
   
@@ -149,6 +153,7 @@ interface DataType {
           style={{ maxHeight: 'calc(100% - 40%)' }}
           pagination={false}
           columns={columns}
+          loading={loading}
           dataSource={data}
         />
       </>
