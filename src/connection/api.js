@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: process.env.API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -9,7 +9,7 @@ const api = axios.create({
 
 const validateToken = async (token) => {
   try {
-    const response = await axios.get('http://localhost:8080/auth/validate-token', {
+    const response = await api.get('/auth/validate-token', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
