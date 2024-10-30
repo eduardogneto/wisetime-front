@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const baseURL = "https://wisetime.site/api";
+
 const api = axios.create({
-  baseURL: "https://wisetime.site/api",
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -9,7 +11,7 @@ const api = axios.create({
 
 const validateToken = async (token) => {
   try {
-    const response = await api.get('/auth/validate-token', {
+    const response = await axios.get(baseURL + '/auth/validate-token', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
