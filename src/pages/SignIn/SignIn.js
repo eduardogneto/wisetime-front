@@ -57,12 +57,11 @@ export default function SignIn() {
     
             setTimeout(() => {
                 setLoadingAuth(false);
-                window.location.reload();
+                window.location.href = '/dashboard';
             }, 2000);
     
         } catch (error) {
             setLoadingAuth(false);
-            console.log(error);
             if (error.code != "ERR_NETWORK") {
                 message.error('Email ou senha inválidos. Por favor, tente novamente.');
             } else {
