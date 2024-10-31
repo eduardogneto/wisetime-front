@@ -88,7 +88,7 @@ const Requests: React.FC = () => {
   return (
     <div className="requests-page">
       <Header />
-      <div className='container-user'>
+      <div className='container-wise'>
         <div className='table'>
           <Breadcrumb />
           <div className='containers-balance'>

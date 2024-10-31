@@ -129,7 +129,7 @@ const HistoryPoint: React.FC = () => {
   return (
     <div className="history-point-container">
       <Header />
-      <div className='container-user'>
+      <div className='container-wise'>
         <div className='table'>
           <Breadcrumb />
           {loading ? (

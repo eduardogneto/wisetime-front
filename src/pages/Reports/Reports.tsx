@@ -79,7 +79,7 @@ const Reports: React.FC = () => {
     return (
         <div className="reports-page">
             <Header />
-            <div className="container-user">
+            <div className="container-wise">
                 <div className="table">
                     <Breadcrumb />
                     <div className='containers-balance'>

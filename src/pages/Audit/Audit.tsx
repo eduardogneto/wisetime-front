@@ -10,7 +10,7 @@ const Audit: React.FC = () => {
     return (
         <div>
             <Header />
-            <div className='container-user'>
+            <div className='container-wise'>
                 <div className='table'>
                     <Breadcrumb />
                     <AuditTable />

@@ -12,7 +12,7 @@ const DueDateBank: React.FC = () => {
   return (
     <div>
       <Header />
-      <div className='container-user'>
+      <div className='container-wise'>
         <div className='table'>
           <Breadcrumb />
           <div className='filters-history' style={{ marginTop: 10 }}>
