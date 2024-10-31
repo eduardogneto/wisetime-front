@@ -63,7 +63,7 @@ export default function SignIn() {
         } catch (error) {
             setLoadingAuth(false);
             console.log(error);
-            if (error.response && error.response.status === 401) {
+            if (error.code != "ERR_NETWORK") {
                 message.error('Email ou senha inválidos. Por favor, tente novamente.');
             } else {
                 message.error('Ops, algo deu errado!');
