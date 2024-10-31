@@ -29,7 +29,7 @@ const ApplicationRoutes = () => {
         setLoading(false); 
     }, []);
 
-    const PrivateRoute = ({ children, requiresAdminOrCoordinator = false, requiresAdmin = false }) => {
+    const PrivateRoute = ({ children, requiresAdminOrCoordinator = false, requiresAdmin = false, noAdmin = false }) => {
         if (loading) return null; 
 
         if (!signed) {
@@ -37,6 +37,10 @@ const ApplicationRoutes = () => {
         }
 
         if (requiresAdminOrCoordinator && !['COORDENADOR', 'ADMINISTRADOR'].includes(userTag)) {
+            return <Navigate to='/dashboard' />;
+        }
+        
+        if (noAdmin && ['ADMINISTRADOR'].includes(userTag)) {
             return <Navigate to='/dashboard' />;
         }
 
@@ -56,10 +60,10 @@ const ApplicationRoutes = () => {
         <BrowserRouter>
             <Routes>
                 <Route path='/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-                <Route path='/historypoint' element={<PrivateRoute><HistoryPoint /></PrivateRoute>} />
+                <Route path='/historypoint' element={<PrivateRoute noAdmin={true}><HistoryPoint /></PrivateRoute>} />
                 <Route path='/management/users' element={<PrivateRoute requiresAdminOrCoordinator={true}><User /></PrivateRoute>} />
                 <Route path='/management/duedatebank' element={<PrivateRoute requiresAdminOrCoordinator={true}><DueDateBank /></PrivateRoute>} />
-                <Route path='/management/requests' element={<PrivateRoute requiresAdminOrCoordinator={true}><Requests /></PrivateRoute>} />
+                <Route path='/management/requests' element={<PrivateRoute noAdmin={true} requiresAdminOrCoordinator={true}><Requests /></PrivateRoute>} />
                 <Route path='/management/organization' element={<PrivateRoute requiresAdmin={true}><Organization /></PrivateRoute>} />
                 <Route path='/management/reports' element={<PrivateRoute requiresAdminOrCoordinator={true}><Reports /></PrivateRoute>} />
                 <Route path='/management/audit' element={<PrivateRoute requiresAdmin={true}><Audit /></PrivateRoute>} />

@@ -24,12 +24,12 @@ export default function Header() {
       label: 'Bater Ponto',
       path: '/dashboard'
     },
-    {
+    ...(perm !== 'ADMINISTRADOR' ? [{
       key: '2',
       icon: <ContainerOutlined />,
       label: 'Histórico de Ponto',
       path: '/historypoint'
-    },
+    }] : []),
     ...(perm === 'COORDENADOR' || perm === 'ADMINISTRADOR' ? [{
       key: 'sub1',
       label: 'Painel de Gestor',
@@ -45,11 +45,11 @@ export default function Header() {
           label: 'Vencimento de Banco',
           path: '/management/duedatebank'
         },
-        {
+        ...(perm !== 'ADMINISTRADOR' ? [{
           key: '5',
           label: 'Solicitações',
           path: '/management/requests'
-        },
+        }] : []),
         {
           key: '6',
           label: 'Relatórios',

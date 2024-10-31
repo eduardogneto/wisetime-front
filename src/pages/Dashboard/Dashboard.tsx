@@ -2,19 +2,22 @@ import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import './style.sass';
 import { EnvironmentOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { Button, message } from 'antd';
+import { Button, message, Spin } from 'antd';
 import api from '../../connection/api'; 
 import dayjs from 'dayjs';
 
 const name = localStorage.getItem('name');
 const userId = localStorage.getItem('id'); 
+const tag = localStorage.getItem('tag'); 
 
 const Dashboard: React.FC = () => {
   const [currentDateTime, setCurrentDateTime] = useState('');
   const [userLocation, setUserLocation] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); 
-  const [punchLogs, setPunchLogs] = useState([]);
+  const [loadingPunchLogs, setLoadingPunchLogs] = useState(false); 
+  const [punchLogs, setPunchLogs] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<number | null>(null);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
 
   const formatDate = (date: Date) => {
     const day = date.getDate();
@@ -96,6 +99,7 @@ const Dashboard: React.FC = () => {
 
   const fetchPunchLogs = async () => {
     try {
+      setLoadingPunchLogs(true);
       const response = await api.get(`/api/punch/history/${userId}/${new Date().toISOString().split('T')[0]}`);
       if (response.status === 200) {
         const sortedLogs = response.data.sort((a: any, b: any) => {
@@ -112,6 +116,8 @@ const Dashboard: React.FC = () => {
       console.error('Erro ao buscar registros de ponto:', error);
       setPunchLogs([]);
       message.error('Erro ao buscar os registros de ponto.');
+    } finally {
+      setLoadingPunchLogs(false);
     }
   };
 
@@ -126,7 +132,7 @@ const Dashboard: React.FC = () => {
     const timestamp = dayjs().subtract(3, 'hour').toISOString();
     const type = 'ENTRY'; 
   
-    setLoading(true); 
+    setLoadingPunchLogs(true); 
   
     try {
       const response = await api.post('/api/punch/log', {
@@ -146,7 +152,7 @@ const Dashboard: React.FC = () => {
       console.error('Erro ao registrar ponto:', error);
       message.error('Erro ao registrar a batida de ponto.');
     } finally {
-      setLoading(false); 
+      setLoadingPunchLogs(false); 
     }
   };
 
@@ -165,7 +171,7 @@ const Dashboard: React.FC = () => {
   });
 
   const fetchBalances = async () => {
-    setLoading(true);
+    setLoadingPunchLogs(true);
     try {
       let userId = localStorage.getItem('id');
       let organizationId = localStorage.getItem('organizationId');
@@ -183,13 +189,35 @@ const Dashboard: React.FC = () => {
       console.error('Erro ao buscar os saldos:', error);
       message.error('Erro ao buscar os saldos');
     } finally {
-      setLoading(false);
+      setLoadingPunchLogs(false);
+    }
+  };
+
+  const fetchEmployees = async () => {
+    setLoadingEmployees(true);
+    try {
+      let organizationId = localStorage.getItem('organizationId');
+
+      if (!organizationId) {
+        throw new Error('Usuário ou organização não encontrados.');
+      }
+
+      const response = await api.get(`/api/users/employees/${organizationId}`);
+      console.log(response.data);
+      setEmployees(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar os usuários:', error);
+      message.error('Erro ao buscar os usuários');
+    } finally {
+      setLoadingEmployees(false);
     }
   };
 
   useEffect(() => {
-    fetchBalances();
-  }, []);
+    if (tag === 'ADMINISTRADOR') {
+      fetchEmployees();
+    }
+  }, [tag]);
 
   return (
     <div>
@@ -201,77 +229,100 @@ const Dashboard: React.FC = () => {
               <p>Olá</p>
               <p>{name}, </p>
             </div>
-            <div className='hello-line2'>
-              <p>Registre seu ponto</p>
-              <p>agora!</p>
-            </div>
+            {tag !== 'ADMINISTRADOR' ? (
+              <div className='hello-line2'>
+                <p>Registre seu ponto</p>
+                <p>agora!</p>
+              </div>
+            ) : (
+              <div className='hello-line2'>
+                <p>Gerencie sua empresa</p>
+                <p>agora!</p>
+              </div>
+            )}
           </div>
           <div className='date-point'>
             <div className='date-button'>
               <div className='date-hour'>
                 <p>{currentDateTime}</p>
               </div>
-              <div className='button-point'>
-                <Button type="primary" onClick={handlePunchClock} loading={loading}>
-                  <h1 style={{ fontSize: 40 }}>Bater Ponto</h1>
-                </Button>
-              </div>
+              {tag !== 'ADMINISTRADOR' ? (
+                <div className='button-point'>
+                  <Button type="primary" onClick={handlePunchClock} loading={loadingPunchLogs}>
+                    <h1 style={{ fontSize: 40 }}>Bater Ponto</h1>
+                  </Button>
+                </div>
+              ) : (
+                <div className='button-point'>
+                  <p style={{fontSize:25}}>Aqui você pode separar seus funcionários e Coordenadores como desejar!</p>
+                </div>
+              )}
             </div>
-            <div className='right-point'>
-              <div className='container-hours'>
-                <p className='top-balace'>Saldo Período</p>
-                <p className='low-balace'>
-                  {
-                    (() => {
-                      const { symbol, formattedTime } = formatBalance(balances.currentPeriodBalance);
-                      return (
-                        <>
-                          <span className='pink'>{symbol}</span>
-                          <span>{formattedTime}</span>
-                        </>
-                      );
-                    })()
-                  }
-                </p>
+            {tag !== 'ADMINISTRADOR' && (
+              <div className='right-point'>
+                <div className='container-hours'>
+                  <p className='top-balace'>Saldo Período</p>
+                  <p className='low-balace'>
+                    {
+                      (() => {
+                        const { symbol, formattedTime } = formatBalance(balances.currentPeriodBalance);
+                        return (
+                          <>
+                            <span className='pink'>{symbol}</span>
+                            <span>{formattedTime}</span>
+                          </>
+                        );
+                      })()
+                    }
+                  </p>
+                </div>
+                <div className='container-map'>
+                  <p className='top-balace'>Saldo Geral</p>
+                  <p className='low-balace'>
+                    {
+                      (() => {
+                        const { symbol, formattedTime } = formatBalance(balances.totalBalance);
+                        return (
+                          <>
+                            <span className='pink'>{symbol}</span>
+                            <span>{formattedTime}</span>
+                          </>
+                        );
+                      })()
+                    }
+                  </p>
+                </div>
               </div>
-              <div className='container-map'>
-                <p className='top-balace'>Saldo Geral</p>
-                <p className='low-balace'>
-                  {
-                    (() => {
-                      const { symbol, formattedTime } = formatBalance(balances.totalBalance);
-                      return (
-                        <>
-                          <span className='pink'>{symbol}</span>
-                          <span>{formattedTime}</span>
-                        </>
-                      );
-                    })()
-                  }
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
       <div className='container-infos'>
         <div className='left-info'>
           <div className="punch-logs">
-            {punchLogs.length === 0 ? (
-              <p>Nenhum ponto registrado!</p>
+            {tag !== 'ADMINISTRADOR' ? (
+              punchLogs.length === 0 ? (
+                <p>Nenhum ponto registrado!</p>
+              ) : (
+                punchLogs.map((log: any, index: number) => (
+                  <div className="punch-log" key={log.id}>
+                    <CheckCircleOutlined
+                      style={{
+                        fontSize: 23,
+                        color: log.location ? '#FF3366' : '#A9A9A9'
+                      }}
+                    />
+                    <b>{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b>
+                    <span className="type">{log.type === 'ENTRY' ? 'E' : 'S'}</span>
+                  </div>
+                ))
+              )
             ) : (
-              punchLogs.map((log: any, index: number) => (
-                <div className="punch-log" key={log.id}>
-                  <CheckCircleOutlined
-                    style={{
-                      fontSize: 23,
-                      color: log.location ? '#FF3366' : '#A9A9A9'
-                    }}
-                  />
-                  <b>{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b>
-                  <span className="type">{log.type === 'ENTRY' ? 'E' : 'S'}</span>
-                </div>
-              ))
+              loadingEmployees ? (
+                <Spin tip="Carregando dados de funcionários..." />
+              ) : (
+                <p>Sua Empresa tem atualmente {employees} funcionários!</p>
+              )
             )}
           </div>
           <div className='localization-info'>
