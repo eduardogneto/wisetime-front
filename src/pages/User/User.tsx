@@ -1,6 +1,6 @@
 import Header from '../../components/Header';
 import './style.sass';
-import { Input, Modal, Select, message } from 'antd';
+import { Input, Modal, Select, message, Button } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
 import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
@@ -23,10 +23,11 @@ const User: React.FC = () => {
   const [password, setPassword] = useState('');
   const [teamId, setTeamId] = useState<number | null>(null);
   const [tag, setTag] = useState('');
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-
+  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [refresh, setRefresh] = useState(0); 
   const organizationId = localStorage.getItem('organizationId');
+  const userTag = localStorage.getItem('userTag');
 
   useEffect(() => {
     const fetchTeams = async () => {
@@ -49,7 +50,8 @@ const User: React.FC = () => {
   }, [organizationId]);
 
   const showModal = () => {
-    if (selectedUser) {
+    if (selectedUsers.length === 1) {
+      const selectedUser = selectedUsers[0];
       setName(selectedUser.name);
       setEmail(selectedUser.email);
       setTeamId(selectedUser.team?.id || null);
@@ -60,7 +62,7 @@ const User: React.FC = () => {
   };
 
   const handleOk = async () => {
-    if (!email || !name || !teamId || !tag || (!selectedUser && !password)) {
+    if (!email || !name || !teamId || !tag || (selectedUsers.length === 0 && !password)) {
       message.error('Por favor, preencha todos os campos obrigatórios!');
       return;
     }
@@ -72,17 +74,17 @@ const User: React.FC = () => {
       tag,
     };
 
-    if (!selectedUser || (selectedUser && password)) {
+    if (!selectedUsers.length || (selectedUsers.length === 1 && password)) {
       userData.password = password;
     }
 
-    if (selectedUser && selectedUser.id) {
-      userData.id = selectedUser.id;
+    if (selectedUsers.length === 1) {
+      userData.id = selectedUsers[0].id;
     }
 
     try {
-      if (selectedUser && selectedUser.id) {
-        await api.put(`/auth/users/${selectedUser.id}`, userData);
+      if (selectedUsers.length === 1) {
+        await api.put(`/auth/users/${selectedUsers[0].id}`, userData);
         message.success('Usuário editado com sucesso!');
       } else {
         await api.post('/auth/register', userData);
@@ -103,7 +105,28 @@ const User: React.FC = () => {
     setPassword('');
     setTeamId(null);
     setTag('');
-    setSelectedUser(null);
+    setSelectedUsers([]);
+  };
+
+  const handleDelete = async () => {
+    const selectedUserIds = selectedUsers.map(user => user.id);
+  
+    if (selectedUserIds.length === 0) {
+      message.error('Por favor, selecione um ou mais usuários para deletar.');
+      return;
+    }
+  
+    try {
+      await api.delete('/api/users/deleteUsers', {
+        data: selectedUserIds, 
+      });
+      message.success('Usuário(s) deletado(s) com sucesso!');
+      setRefresh((prev) => prev + 1); 
+      setSelectedUsers([]); 
+    } catch (error) {
+      console.error(error);
+      message.error('Erro ao deletar o(s) usuário(s).');
+    }
   };
 
   const handleCancel = () => {
@@ -131,72 +154,44 @@ const User: React.FC = () => {
                   color: 'white',
                   marginRight: 15,
                 }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)} 
               />
             </div>
             <div className='right-filters'>
               <TopButtons
                 handleEdit={showModal}
-                handleDelete={showModal}
-                isEditable={!!selectedUser}
-                isDeletable
+                handleDelete={handleDelete}
+                isEditable={selectedUsers.length === 1} 
+                isDeletable={selectedUsers.length > 0}  
               />
               <div className='button-history'>
-                <button type='submit' onClick={showModal} style={{ marginLeft: 15 }}>
+                <Button
+                  type='submit'
+                  onClick={showModal}
+                  disabled={userTag !== 'ADMINISTRADOR'}
+                  style={{
+                    marginLeft: 15,
+                    opacity: userTag === 'ADMINISTRADOR' ? 1 : 0.5,
+                  }}
+                >
                   <p>Cadastrar</p>
-                </button>
+                </Button>
               </div>
             </div>
           </div>
-          <UserTable onSelectUser={setSelectedUser} refresh={refresh} /> 
+          <UserTable 
+            onSelectUsers={setSelectedUsers} 
+            refresh={refresh} 
+            searchTerm={searchTerm} 
+          />
           <Modal
             className='modal'
-            title={selectedUser ? "Editar usuário" : "Cadastrar novo usuário"}
+            title={selectedUsers.length === 1 ? "Editar usuário" : "Cadastrar novo usuário"}
             open={isModalOpen}
             onOk={handleOk}
             onCancel={handleCancel}
           >
-            <div className='input-modal'>
-              <h4>Nome</h4>
-              <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div className='input-modal'>
-              <h4>Email</h4>
-              <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className='input-modal'>
-              <h4>Senha</h4>
-              <Input
-                placeholder={selectedUser ? "Deixe em branco para manter a senha atual" : "Senha"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                type="password" 
-              />
-            </div>
-            <div className='input-modal'>
-              <h4>Cargo</h4>
-              <Select
-                style={{ width: '100%' }}
-                placeholder="Selecione o cargo"
-                loading={loadingTeams}
-                value={teamId}
-                onChange={(value) => setTeamId(value)}
-                options={teams.map(team => ({ value: team.id, label: team.name }))}
-              />
-            </div>
-            <div className='input-modal'>
-              <h4>Tag</h4>
-              <Select
-                style={{ width: '100%' }}
-                placeholder="Selecione a tag"
-                value={tag}
-                onChange={(value) => setTag(value)}
-                options={[
-                  { value: 'ADMINISTRADOR', label: 'Administrador' },
-                  { value: 'COORDENADOR', label: 'Coordenador' },
-                  { value: 'FUNCIONARIO', label: 'Funcionário' },
-                ]}
-              />
-            </div>
           </Modal>
         </div>
       </div>

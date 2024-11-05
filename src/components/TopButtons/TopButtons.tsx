@@ -18,10 +18,8 @@ export const TopButtons: React.FC<ITopButtons> = ({
   handleNew,
   handleDelete,
   handleEdit,
-  handleSearch,
   isEditable,
   isDeletable,
-  searchPlaceholder,
   exportGridData,
 }) => {
   return (
@@ -33,6 +31,7 @@ export const TopButtons: React.FC<ITopButtons> = ({
           icon={<EditOutlined style={{ fontSize: 23, color: '#FFF' }} />}
           disabled={!isEditable}
           title={"Editar"}
+          style={{ opacity: isEditable ? 1 : 0.5 }} 
         />
       )}
       {handleDelete && (
@@ -49,7 +48,8 @@ export const TopButtons: React.FC<ITopButtons> = ({
           <Button
             disabled={!isDeletable}
             className="top-tool-buttons trash"
-            icon={<DeleteOutlined style={{ fontSize: 23 }} />}
+            icon={<DeleteOutlined style={{ fontSize: 23, color: '#FFF' }} />}
+            style={{ opacity: isDeletable ? 1 : 0.5 }} 
           />
         </Popconfirm>
       )}
