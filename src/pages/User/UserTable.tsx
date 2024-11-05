@@ -2,18 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { Avatar, Table, Tag } from 'antd';
 import api from '../../connection/api';
 
+interface Team {
+  name: string;
+}
+
 interface UserResponseDTO { 
   id: number;
   name: string;
   email: string;
   organizationId: number;
-  teamName: string; 
+  team: Team;
   tag: string;
 }
 
 interface UserTableProps {
-  onSelectUser: (user: UserResponseDTO | null) => void;
-  refresh: number; 
+  onSelectUsers: (users: UserResponseDTO[]) => void;
+  refresh: number;
+  searchTerm: string; 
 }
 
 const getInitials = (applicant: string) => {
@@ -25,7 +30,7 @@ const getInitials = (applicant: string) => {
   return 'NN';
 };
 
-const UserTable: React.FC<UserTableProps> = ({ onSelectUser, refresh }) => {
+const UserTable: React.FC<UserTableProps> = ({ onSelectUsers, refresh, searchTerm }) => {
   const [users, setUsers] = useState<UserResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +59,17 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser, refresh }) => {
       setError('Organization ID não encontrado.');
       setLoading(false);
     }
-  }, [organizationId, refresh]); 
+  }, [organizationId, refresh]);
+
+  const filteredUsers = users.filter((user) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      user.name.toLowerCase().includes(search) ||
+      user.email.toLowerCase().includes(search) ||
+      user.team?.name.toLowerCase().includes(search) ||
+      user.tag.toLowerCase().includes(search)
+    );
+  });
 
   const columns = [
     {
@@ -71,7 +86,11 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser, refresh }) => {
       ),
     },
     { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Time', dataIndex: 'teamName', key: 'teamName' }, 
+    { 
+      title: 'Time', 
+      dataIndex: ['team', 'name'], 
+      key: 'teamName' 
+    }, 
     {
       title: 'Tag',
       dataIndex: 'tag',
@@ -96,11 +115,7 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser, refresh }) => {
     selectedRowKeys,
     onChange: (selectedKeys: React.Key[], selectedRows: UserResponseDTO[]) => {
       setSelectedRowKeys(selectedKeys as number[]);
-      if (selectedRows.length === 1) {
-        onSelectUser(selectedRows[0]);
-      } else {
-        onSelectUser(null);
-      }
+      onSelectUsers(selectedRows);
     },
     type: 'checkbox', 
   };
@@ -114,7 +129,7 @@ const UserTable: React.FC<UserTableProps> = ({ onSelectUser, refresh }) => {
       pagination={false}
       scroll={{ y: 400 }}
       columns={columns}
-      dataSource={users}
+      dataSource={filteredUsers} 
       loading={loading}
       rowSelection={rowSelection}
     />
