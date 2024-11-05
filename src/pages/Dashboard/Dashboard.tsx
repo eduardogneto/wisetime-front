@@ -95,6 +95,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     getUserLocation();
     fetchPunchLogs(); 
+    fetchBalances();
   }, []);
 
   const fetchPunchLogs = async () => {
@@ -173,17 +174,17 @@ const Dashboard: React.FC = () => {
   const fetchBalances = async () => {
     setLoadingPunchLogs(true);
     try {
-      let userId = localStorage.getItem('id');
-      let organizationId = localStorage.getItem('organizationId');
-
+      const userId = localStorage.getItem('id');
+      const organizationId = localStorage.getItem('organizationId');
+  
       if (!userId || !organizationId) {
         throw new Error('Usuário ou organização não encontrados.');
       }
-
+  
       const response = await api.get(`/api/users/${userId}/balances`, {
         params: { organizationId },
       });
-
+  
       setBalances(response.data);
     } catch (error) {
       console.error('Erro ao buscar os saldos:', error);
