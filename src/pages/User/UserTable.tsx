@@ -141,7 +141,7 @@ const UserTable: React.FC<UserTableProps> = ({
       columns={columns}
       dataSource={filteredUsers}
       loading={loading}
-      // rowSelection={rowSelection}
+      rowSelection={rowSelection}
     />
   );
 };
