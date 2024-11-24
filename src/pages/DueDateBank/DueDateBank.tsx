@@ -1,6 +1,6 @@
 import { Select } from "antd";
 import React from "react";
-import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.tsx";
+import Breadcrumb from "../../components/Breadcrumb/breadcrumb.tsx";
 import Header from "../../components/Header";
 import { TopButtons } from "../../components/TopButtons/TopButtons.tsx";
 import "./DueDateBank.sass";

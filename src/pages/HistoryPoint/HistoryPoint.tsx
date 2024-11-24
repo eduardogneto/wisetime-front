@@ -2,7 +2,7 @@ import { Select, Spin, message, Skeleton } from "antd";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import React, { useEffect, useState } from "react";
-import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.tsx";
+import Breadcrumb from "../../components/Breadcrumb/breadcrumb.tsx";
 import Header from "../../components/Header";
 import { TopButtons } from "../../components/TopButtons/TopButtons.tsx";
 import api from "../../connection/api";

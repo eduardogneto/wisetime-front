@@ -1,6 +1,6 @@
 import { Select, SelectProps, Skeleton, Tooltip, message } from "antd";
 import React, { useEffect, useState } from "react";
-import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.tsx";
+import Breadcrumb from "../../components/Breadcrumb/breadcrumb.tsx";
 import Header from "../../components/Header/index.js";
 import api from "../../connection/api";
 import "./Requests.sass";

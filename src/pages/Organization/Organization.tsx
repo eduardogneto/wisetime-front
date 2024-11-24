@@ -16,7 +16,7 @@ import {
   DeleteOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.tsx";
+import Breadcrumb from "../../components/Breadcrumb/breadcrumb.tsx";
 import Header from "../../components/Header/index.js";
 import OrganizationTable from "./OrganizationTable.tsx";
 import { TopButtons } from "../../components/TopButtons/TopButtons.tsx";

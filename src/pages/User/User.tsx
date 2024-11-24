@@ -3,7 +3,7 @@ import "./User.sass";
 import { Input, Modal, Select, message, Button } from "antd";
 import React, { useState, useEffect } from "react";
 import { SearchOutlined } from "@ant-design/icons";
-import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.tsx";
+import Breadcrumb from "../../components/Breadcrumb/breadcrumb.tsx";
 import UserTable from "./UserTable.tsx";
 import { TopButtons } from "../../components/TopButtons/TopButtons.tsx";
 import api from "../../connection/api";
