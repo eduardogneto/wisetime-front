@@ -1,23 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { ColumnsType } from 'antd/es/table';
+import { UploadOutlined } from "@ant-design/icons";
 import {
+  Button,
+  DatePicker,
+  Flex,
+  Form,
+  Input,
+  message,
+  Modal,
+  Select,
   Table,
   Tag,
-  Modal,
-  Button,
-  message,
-  Input,
-  Form,
-  Select,
-  DatePicker,
   Upload,
-} from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import EditDelete from '../../components/EditDelete/EditDelete.tsx';
-import api from '../../connection/api';
-import dayjs from 'dayjs';
-import 'dayjs/locale/pt-br'; 
-dayjs.locale('pt-br'); 
+} from "antd";
+import { ColumnsType } from "antd/es/table";
+import dayjs from "dayjs";
+import "dayjs/locale/pt-br";
+import React, { useEffect, useState } from "react";
+import EditDelete from "../../components/EditDelete/EditDelete.tsx";
+import api from "../../connection/api";
+dayjs.locale("pt-br");
 
 interface DataType {
   key: string;
@@ -41,48 +42,55 @@ interface HistoryPointTableProps {
 const { Option } = Select;
 
 const getWeekdayName = (date: dayjs.Dayjs) => {
-  return date.format('dddd'); 
+  return date.format("dddd");
 };
 
-const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod }) => {
+const HistoryPointTable: React.FC<HistoryPointTableProps> = ({
+  selectedPeriod,
+}) => {
   const [data, setData] = useState<DataType[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [detailData, setDetailData] = useState<DetailData[]>([]);
   const [addedPunches, setAddedPunches] = useState<DetailData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [justification, setJustification] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [justification, setJustification] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [editPunch, setEditPunch] = useState<DetailData | null>(null);
 
-  const [isCertificateModalVisible, setIsCertificateModalVisible] = useState(false);
+  const [isCertificateModalVisible, setIsCertificateModalVisible] =
+    useState(false);
   const [certificateData, setCertificateData] = useState<{
     startDate: any;
     endDate: any;
     photo: any;
-    imageBase64: string; 
+    imageBase64: string;
     justification: string;
   }>({
     startDate: null,
     endDate: null,
     photo: null,
-    imageBase64: '',
-    justification: '',
+    imageBase64: "",
+    justification: "",
   });
 
-  const [sendingJustification, setSendingJustification] = useState<boolean>(false);
+  const [sendingJustification, setSendingJustification] =
+    useState<boolean>(false);
   const [sendingCertificate, setSendingCertificate] = useState<boolean>(false);
   const [addingPunch, setAddingPunch] = useState<boolean>(false);
 
   const getDatesInRange = (start: string, end: string) => {
     const startDate = dayjs(start);
     const endDate = dayjs(end);
-    const dates = [];
+    const dates: string[] = [];
 
     let currentDate = startDate;
-    while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
-      dates.push(currentDate.format('DD/MM/YYYY'));
-      currentDate = currentDate.add(1, 'day');
+    while (
+      currentDate.isBefore(endDate) ||
+      currentDate.isSame(endDate, "day")
+    ) {
+      dates.push(currentDate.format("DD/MM/YYYY"));
+      currentDate = currentDate.add(1, "day");
     }
 
     return dates;
@@ -91,29 +99,34 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
   const fetchHistoryData = async () => {
     setLoading(true);
     try {
-      const userId = localStorage.getItem('id');
+      const userId = localStorage.getItem("id");
       const response = await api.get(`/api/punch/history/summary/${userId}`);
 
       const punchData =
         response.data.length > 0
           ? response.data.map((item: any) => {
-              const dateObj = dayjs(item.date); 
+              const dateObj = dayjs(item.date);
               return {
                 key: item.date,
-                date: `${dateObj.format('DD/MM/YYYY')} - ${getWeekdayName(dateObj)}`, 
+                date: `${dateObj.format("DD/MM/YYYY")} - ${getWeekdayName(
+                  dateObj
+                )}`,
                 entrys: item.entryCount || 0,
-                outs: item.exitCount || 0, 
-                tags: [item.status || 'Incompleto'],
+                outs: item.exitCount || 0,
+                tags: [item.status || "Incompleto"],
               };
             })
           : [];
 
-      const allDates = getDatesInRange(selectedPeriod.start, selectedPeriod.end);
+      const allDates = getDatesInRange(
+        selectedPeriod.start,
+        selectedPeriod.end
+      );
 
       const combinedData = allDates.map((date) => {
-        const dateObj = dayjs(date, 'DD/MM/YYYY');
+        const dateObj = dayjs(date, "DD/MM/YYYY");
         const punchForDate = punchData.find((p) =>
-          dayjs(p.key).isSame(dateObj, 'day') 
+          dayjs(p.key).isSame(dateObj, "day")
         );
 
         return (
@@ -122,14 +135,14 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
             date: `${date} - ${getWeekdayName(dateObj)}`,
             entrys: 0,
             outs: 0,
-            tags: ['Incompleto'],
+            tags: ["Incompleto"],
           }
         );
       });
 
       setData(combinedData);
     } catch (error) {
-      message.error('Erro ao buscar o histórico.');
+      message.error("Erro ao buscar o histórico.");
     } finally {
       setLoading(false);
     }
@@ -138,25 +151,27 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
   const fetchPunchDetails = async (date: string) => {
     setLoading(true);
     try {
-      const userId = localStorage.getItem('id');
-      const formattedDate = dayjs(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
-      const response = await api.get(`/api/punch/history/${userId}/${formattedDate}`);
+      const userId = localStorage.getItem("id");
+      const formattedDate = dayjs(date, "DD/MM/YYYY").format("YYYY-MM-DD");
+      const response = await api.get(
+        `/api/punch/history/${userId}/${formattedDate}`
+      );
       const fetchedDetails = response.data.map((item: any) => ({
         id: item.id,
-        status: item.type === 'ENTRY' ? 'Entrada' : 'Saída',
-        hours: dayjs(item.timestamp).format('HH:mm'),
+        status: item.type === "ENTRY" ? "Entrada" : "Saída",
+        hours: dayjs(item.timestamp).format("HH:mm"),
         editable: false,
       }));
 
       setDetailData(fetchedDetails);
 
       if (response.data[0]) {
-        setJustification(response.data[0].justification || '');
+        setJustification(response.data[0].justification || "");
       }
 
       setIsModalVisible(true);
     } catch (error) {
-      message.error('Erro ao buscar os detalhes das batidas.');
+      message.error("Erro ao buscar os detalhes das batidas.");
     } finally {
       setLoading(false);
     }
@@ -164,17 +179,17 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
 
   const addNewPunch = async () => {
     try {
-      setAddingPunch(true); 
+      setAddingPunch(true);
       const newPunch: DetailData = {
         id: (Math.random() * 1000).toString(),
-        status: 'Entrada',
-        hours: '',
+        status: "Entrada",
+        hours: "",
         editable: true,
       };
       setDetailData([...detailData, newPunch]);
       setAddedPunches([...addedPunches, newPunch]);
     } catch (error) {
-      message.error('Erro ao adicionar nova batida.');
+      message.error("Erro ao adicionar nova batida.");
     } finally {
       setAddingPunch(false);
     }
@@ -189,15 +204,17 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
     if (!editPunch) return;
 
     Modal.confirm({
-      title: 'Confirmação de Edição',
+      title: "Confirmação de Edição",
       content: `Tem certeza que deseja trocar de ${editPunch.status} para ${newStatus}?`,
       onOk: () => {
         const updatedData = detailData.map((punch) =>
-          punch.id === editPunch.id ? { ...punch, status: newStatus, editable: false } : punch
+          punch.id === editPunch.id
+            ? { ...punch, status: newStatus, editable: false }
+            : punch
         );
         setDetailData(updatedData);
         setEditModalVisible(false);
-        message.success('Tipo de ponto alterado com sucesso!');
+        message.success("Tipo de ponto alterado com sucesso!");
       },
     });
   };
@@ -217,23 +234,25 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
   const sendRequest = async () => {
     try {
       if (addedPunches.length === 0) {
-        message.warning('Adicione uma nova batida antes de enviar a justificativa.');
+        message.warning(
+          "Adicione uma nova batida antes de enviar a justificativa."
+        );
         return;
       }
       if (!justification) {
-        message.warning('Preencha a justificativa antes de enviar.');
+        message.warning("Preencha a justificativa antes de enviar.");
         return;
       }
 
-      setSendingJustification(true); 
+      setSendingJustification(true);
 
-      const id = localStorage.getItem('id');
+      const id = localStorage.getItem("id");
 
-      const date = dayjs(selectedDate, 'DD/MM/YYYY').format('YYYY-MM-DD');
+      const date = dayjs(selectedDate, "DD/MM/YYYY").format("YYYY-MM-DD");
 
       const requestPayload = {
         id,
-        requestType: 'ADICAO_DE_PONTO',
+        requestType: "ADICAO_DE_PONTO",
         justification,
         punches: addedPunches.map((punch) => {
           const fullDateTime = `${date}T${punch.hours}:00`;
@@ -248,21 +267,23 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         (punch) => punch.hours === `${date}T:00`
       );
       if (hasEmptyTime) {
-        message.error('Há horários vazios. Por favor, preencha antes de enviar.');
-        setSendingJustification(false); 
+        message.error(
+          "Há horários vazios. Por favor, preencha antes de enviar."
+        );
+        setSendingJustification(false);
         return;
       }
 
-      await api.post('/api/request/create', requestPayload);
+      await api.post("/api/request/create", requestPayload);
 
-      message.success('Solicitação enviada ao coordenador.');
+      message.success("Solicitação enviada ao coordenador.");
       setIsModalVisible(false);
       setAddedPunches([]);
-      setJustification('');
+      setJustification("");
     } catch (error) {
-      message.error('Erro ao enviar a solicitação.');
+      message.error("Erro ao enviar a solicitação.");
     } finally {
-      setSendingJustification(false); 
+      setSendingJustification(false);
     }
   };
 
@@ -278,41 +299,43 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       !certificateData.imageBase64 ||
       !certificateData.justification
     ) {
-      message.warning('Por favor, preencha todos os campos e anexe o atestado.');
+      message.warning(
+        "Por favor, preencha todos os campos e anexe o atestado."
+      );
       return;
     }
 
     try {
-      setSendingCertificate(true); 
+      setSendingCertificate(true);
 
-      const id = localStorage.getItem('id');
+      const id = localStorage.getItem("id");
 
       const requestPayload = {
         id,
-        requestType: 'ATESTADO',
+        requestType: "ATESTADO",
         justification: certificateData.justification,
         certificate: {
-          startDate: certificateData.startDate.format('YYYY-MM-DD'),
-          endDate: certificateData.endDate.format('YYYY-MM-DD'),
+          startDate: certificateData.startDate.format("YYYY-MM-DD"),
+          endDate: certificateData.endDate.format("YYYY-MM-DD"),
           imageBase64: certificateData.imageBase64,
         },
       };
 
-      await api.post('/api/request/create', requestPayload);
+      await api.post("/api/request/create", requestPayload);
 
-      message.success('Atestado enviado com sucesso.');
+      message.success("Atestado enviado com sucesso.");
       setCertificateData({
         startDate: null,
         endDate: null,
         photo: null,
-        imageBase64: '',
-        justification: '',
+        imageBase64: "",
+        justification: "",
       });
       setIsCertificateModalVisible(false);
     } catch (error) {
-      message.error('Erro ao enviar o atestado.');
+      message.error("Erro ao enviar o atestado.");
     } finally {
-      setSendingCertificate(false); 
+      setSendingCertificate(false);
     }
   };
 
@@ -327,34 +350,38 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
 
   const columns: ColumnsType<DataType> = [
     {
-      title: 'Data',
-      dataIndex: 'date',
-      key: 'date',
-      align: 'center',
+      title: "Data",
+      dataIndex: "date",
+      key: "date",
+      align: "center",
+      width: 100,
     },
     {
-      title: 'Entradas',
-      dataIndex: 'entrys',
-      key: 'entrys',
-      align: 'center',
+      title: "Entradas",
+      dataIndex: "entrys",
+      key: "entrys",
+      align: "center",
       render: (text: number) => `${text} Entradas`,
+      width: 100,
     },
     {
-      title: 'Saídas',
-      dataIndex: 'outs',
-      key: 'outs',
-      align: 'center',
+      title: "Saídas",
+      dataIndex: "outs",
+      key: "outs",
+      align: "center",
       render: (text: number) => `${text} Saídas`,
+      width: 100,
     },
     {
-      title: 'Tags',
-      key: 'tags',
-      dataIndex: 'tags',
-      align: 'center',
+      title: "Tags",
+      key: "tags",
+      dataIndex: "tags",
+      align: "center",
+      width: 100,
       render: (_, { tags }) => (
         <>
           {tags.map((tag) => {
-            let color = tag === 'Completo' ? 'green' : 'red';
+            let color = tag === "Completo" ? "green" : "red";
             return (
               <Tag color={color} key={tag}>
                 {tag.toUpperCase()}
@@ -365,9 +392,10 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
       ),
     },
     {
-      title: 'Ação',
-      key: 'action',
-      align: 'center',
+      title: "Ação",
+      key: "action",
+      align: "center",
+      width: 100,
       render: (_, record) => (
         <EditDelete
           allowCertificate
@@ -381,15 +409,15 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
 
   const punchColumns: ColumnsType<DetailData> = [
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       render: (_, record) =>
         record.editable ? (
           <Select
             value={record.status}
-            onChange={(value) => updatePunch(record.id, 'status', value)}
-            style={{ width: '100%' }}
+            onChange={(value) => updatePunch(record.id, "status", value)}
+            style={{ width: "100%" }}
           >
             <Option value="Entrada">Entrada</Option>
             <Option value="Saída">Saída</Option>
@@ -399,14 +427,14 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         ),
     },
     {
-      title: 'Horário',
-      dataIndex: 'hours',
-      key: 'hours',
+      title: "Horário",
+      dataIndex: "hours",
+      key: "hours",
       render: (_, record) =>
         record.editable ? (
           <Input
             value={record.hours}
-            onChange={(e) => updatePunch(record.id, 'hours', e.target.value)}
+            onChange={(e) => updatePunch(record.id, "hours", e.target.value)}
             placeholder="HH:mm"
           />
         ) : (
@@ -417,14 +445,16 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
 
   return (
     <>
-      <Table
-        style={{ maxHeight: '480px', overflowY: 'auto' }}
-        className="tables-wise"
-        columns={columns}
-        dataSource={data}
-        pagination={false}
-        loading={loading}
-      />
+      <Flex vertical gap="small">
+        <Table
+          style={{ maxHeight: "480px", overflowY: "auto" }}
+          className="tables-wise"
+          columns={columns}
+          dataSource={data}
+          pagination={false}
+          loading={loading}
+        />
+      </Flex>
 
       <Modal
         title="Detalhes do Dia"
@@ -479,7 +509,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
           <Select
             value={editPunch.status}
             onChange={(value) => confirmEditPunch(value)}
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
           >
             <Option value="Entrada">Entrada</Option>
             <Option value="Saída">Saída</Option>
@@ -492,7 +522,10 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         visible={isCertificateModalVisible}
         onCancel={() => setIsCertificateModalVisible(false)}
         footer={[
-          <Button key="cancel" onClick={() => setIsCertificateModalVisible(false)}>
+          <Button
+            key="cancel"
+            onClick={() => setIsCertificateModalVisible(false)}
+          >
             Cancelar
           </Button>,
           <Button
@@ -508,7 +541,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
         <Form layout="vertical">
           <Form.Item label="Data de Início">
             <DatePicker
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               value={certificateData.startDate}
               onChange={(date) =>
                 setCertificateData({ ...certificateData, startDate: date })
@@ -517,7 +550,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
           </Form.Item>
           <Form.Item label="Data de Fim">
             <DatePicker
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               value={certificateData.endDate}
               onChange={(date) =>
                 setCertificateData({ ...certificateData, endDate: date })
@@ -528,18 +561,20 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
             <Upload
               beforeUpload={(file) => {
                 const isImage =
-                  file.type === 'image/jpeg' ||
-                  file.type === 'image/png' ||
-                  file.type === 'image/jpg';
+                  file.type === "image/jpeg" ||
+                  file.type === "image/png" ||
+                  file.type === "image/jpg";
 
                 if (!isImage) {
-                  message.error('Você só pode fazer upload de arquivos JPG/PNG.');
+                  message.error(
+                    "Você só pode fazer upload de arquivos JPG/PNG."
+                  );
                   return Upload.LIST_IGNORE;
                 }
 
-                const maxFileSize = 5 * 1024 * 1024; 
+                const maxFileSize = 5 * 1024 * 1024;
                 if (file.size > maxFileSize) {
-                  message.error('O tamanho da imagem não pode exceder 5 MB.');
+                  message.error("O tamanho da imagem não pode exceder 5 MB.");
                   return Upload.LIST_IGNORE;
                 }
 
@@ -553,14 +588,18 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
                   });
                 };
                 reader.onerror = () => {
-                  message.error('Erro ao ler o arquivo.');
+                  message.error("Erro ao ler o arquivo.");
                 };
 
-                return false; 
+                return false;
               }}
               fileList={certificateData.photo ? [certificateData.photo] : []}
               onRemove={() =>
-                setCertificateData({ ...certificateData, photo: null, imageBase64: '' })
+                setCertificateData({
+                  ...certificateData,
+                  photo: null,
+                  imageBase64: "",
+                })
               }
             >
               <Button icon={<UploadOutlined />}>Clique para Anexar</Button>
@@ -571,7 +610,10 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({ selectedPeriod })
               rows={4}
               value={certificateData.justification}
               onChange={(e) =>
-                setCertificateData({ ...certificateData, justification: e.target.value })
+                setCertificateData({
+                  ...certificateData,
+                  justification: e.target.value,
+                })
               }
               placeholder="Descreva o motivo do atestado."
             />

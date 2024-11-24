@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '../../components/Header';
 import './style.sass';
-import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
+import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.tsx";
 import AuditTable from './AuditTable.tsx';
 
 

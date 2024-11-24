@@ -1,53 +1,56 @@
 .topBar {
     display: flex;
-    justify-content: space-between; 
+    justify-content: space-between;
     align-items: center;
     margin: 0;
-    padding: 0 20px; 
+    padding: 0 20px;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 999;
     background-color: rgb(17, 19, 29);
     position: fixed;
-    height: 60px; 
-    box-sizing: border-box; 
+    height: 60px;
+        box-sizing: border-box;
 }
 
-.leftbar, .rightbar {
+.leftbar,
+.rightbar {
     display: flex;
-    align-items: center; 
+    align-items: center;
 }
 
-.leftbar h1, .rightbar p {
+.leftbar h1,
+.rightbar p {
     margin: 0;
-    padding-left: 10px; 
-    color: white; 
+    padding-left: 10px;
+        color: white;
 }
 
 .leftbar h1 {
-    font-size: 20px; 
-    margin-left: 10px; 
-    color: white; 
-    display: inline; 
+    font-size: 20px;
+        margin-left: 10px;
+        color: white;
+        display: inline;
 }
 
 .pink {
-    color: #FF3366; 
+    color: #FF3366;
 }
 
 .sidebar {
     position: absolute;
-    top: calc(100% - 95%);
+    top: calc(100% - 100%);
     left: 0;
     width: calc(100% - 85%);
     padding-top: 10px;
     height: 100%;
+    margin-top: 3rem;
 }
 
 .sidebar ul {
     list-style: none;
-    padding: 0;
+    padding-top: 1rem;
     margin: 0;
 }
 
@@ -55,14 +58,24 @@
     background-color: #FF0044;
 }
 
-.ant-menu-item-selected{
+.ant-menu-item-selected {
     background-color: #FF3366 !important;
 }
 
-.ant-menu-dark{
+.ant-menu-dark {
     background-color: rgb(17, 19, 29);
 }
 
-.ant-menu{
+.ant-menu {
     height: 100%;
+}
+
+.ant-menu-submenu-placement-rightTop ul {
+    margin-top: -6.5rem;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        position: fixed;
+    }
 }

@@ -13,12 +13,12 @@
     text-align: center
 
 .top-point-balace
-    font-size: 16px
+    font-size: 0.8rem
     color: white
     margin: 0
 
 .low-point-balace
-    font-size: 36px
+    font-size: 2rem
     color: white
     margin: 0
 
@@ -35,16 +35,16 @@
 
 .filters-history
     display: flex
-    justify-content: space-between 
-    align-items: center 
+    justify-content: space-between
+    align-items: center
 
 .left-filters
     display: flex
-    align-items: center 
+    align-items: center
 
 .right-filters
     display: flex
-    align-items: center 
+    align-items: center
 
 .select
     width: 300px
@@ -64,7 +64,6 @@
 .ant-select-selection-item
     color: white !important
 
-
 .ant-select-item-option-selected
     background-color: #ff426b2c !important
 
@@ -82,17 +81,41 @@ p
     margin-left: 5px
     width: 150px
     height: 50px
-    display: flex 
-    justify-content: center 
-    align-items: center 
+    display: flex
+    justify-content: center
+    align-items: center
 
 .button-history button p
     font-size: 15px
-    margin: 0 
-    text-align: center 
+    margin: 0
+    text-align: center
+
+.button-history button
+    background-color: #FF3366 !important
 
 .button-history button:hover
     background-color: #FF0044
 
 .button-history
     display: flex
+
+@media (max-width: 1024px)
+    .balance-point p
+        font-size: 1rem
+
+@media (max-width: 690px)
+    .balance-point p
+        font-size: 0.8rem
+
+    .filters-history
+        display: block !important
+
+    .filters-history .left-filters
+        margin-bottom: 1rem
+
+    .right-filters
+        justify-content: space-between
+
+@media (max-width: 480px)
+    .balance-point p
+        font-size: 0.6rem

@@ -1,12 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import './style.sass';
-import { Input, Modal, Button, Form, Table, Space, Row, Col, message } from 'antd';
-import { PlusOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
-import Breadcrumb from '../../components/Breadcrumb/breadcrumb.tsx';
-import Header from '../../components/Header/index.js';
-import OrganizationTable from './OrganizationTable.tsx';
-import { TopButtons } from '../../components/TopButtons/TopButtons.tsx';
-import api from '../../connection/api';
+import React, { useState, useEffect } from "react";
+import "./Organization.sass";
+import {
+  Input,
+  Modal,
+  Button,
+  Form,
+  Table,
+  Space,
+  Row,
+  Col,
+  message,
+} from "antd";
+import {
+  PlusOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.tsx";
+import Header from "../../components/Header/index.js";
+import OrganizationTable from "./OrganizationTable.tsx";
+import { TopButtons } from "../../components/TopButtons/TopButtons.tsx";
+import api from "../../connection/api";
 
 interface TeamData {
   key: string;
@@ -28,7 +42,9 @@ const Organization: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [teams, setTeams] = useState<TeamData[]>([]);
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number | null>(null);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<
+    number | null
+  >(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
   const showModal = () => {
@@ -49,8 +65,8 @@ const Organization: React.FC = () => {
   const handleAddTeam = () => {
     const newTeam: TeamData = {
       key: `${Date.now()}`,
-      name: '',
-      description: '',
+      name: "",
+      description: "",
     };
     setTeams([...teams, newTeam]);
   };
@@ -61,11 +77,13 @@ const Organization: React.FC = () => {
 
   const handleTeamChange = (key: string, field: string, value: string) => {
     setTeams(
-      teams.map((team) => (team.key === key ? { ...team, [field]: value } : team))
+      teams.map((team) =>
+        team.key === key ? { ...team, [field]: value } : team
+      )
     );
   };
 
-  const userId = localStorage.getItem('id');
+  const userId = localStorage.getItem("id");
 
   const handleSubmit = () => {
     form
@@ -86,32 +104,40 @@ const Organization: React.FC = () => {
 
         try {
           if (isEditMode && selectedOrganizationId) {
-            await api.put(`/api/organizations/${selectedOrganizationId}`, organizationData);
-            message.success('Organização atualizada com sucesso!');
+            await api.put(
+              `/api/organizations/${selectedOrganizationId}`,
+              organizationData
+            );
+            message.success("Organização atualizada com sucesso!");
           } else {
-            await api.post('/api/organizations/organizations', organizationData);
-            message.success('Organização criada com sucesso!');
+            await api.post(
+              "/api/organizations/organizations",
+              organizationData
+            );
+            message.success("Organização criada com sucesso!");
           }
           setIsModalOpen(false);
           form.resetFields();
           setTeams([]);
         } catch (error) {
-          message.error('Erro ao salvar organização');
+          message.error("Erro ao salvar organização");
         }
       })
       .catch((errorInfo) => {
-        console.log('Erro na validação:', errorInfo);
+        console.log("Erro na validação:", errorInfo);
       });
   };
 
   const handleEdit = async () => {
     if (selectedOrganizationId === null) {
-      message.warning('Por favor, selecione uma organização para editar.');
+      message.warning("Por favor, selecione uma organização para editar.");
       return;
     }
 
     try {
-      const response = await api.get(`/api/organizations/${selectedOrganizationId}`);
+      const response = await api.get(
+        `/api/organizations/${selectedOrganizationId}`
+      );
       const orgData = response.data;
 
       form.setFieldsValue({
@@ -132,38 +158,40 @@ const Organization: React.FC = () => {
       setIsEditMode(true);
       setIsModalOpen(true);
     } catch (error) {
-      message.error('Erro ao carregar dados da organização');
+      message.error("Erro ao carregar dados da organização");
     }
   };
 
   const teamColumns = [
     {
-      title: 'Nome do Time',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Nome do Time",
+      dataIndex: "name",
+      key: "name",
       render: (text: string, record: TeamData) => (
         <Input
           value={text}
-          onChange={(e) => handleTeamChange(record.key, 'name', e.target.value)}
+          onChange={(e) => handleTeamChange(record.key, "name", e.target.value)}
           placeholder="Nome do Time"
         />
       ),
     },
     {
-      title: 'Descrição',
-      dataIndex: 'description',
-      key: 'description',
+      title: "Descrição",
+      dataIndex: "description",
+      key: "description",
       render: (text: string, record: TeamData) => (
         <Input
           value={text}
-          onChange={(e) => handleTeamChange(record.key, 'description', e.target.value)}
+          onChange={(e) =>
+            handleTeamChange(record.key, "description", e.target.value)
+          }
           placeholder="Descrição"
         />
       ),
     },
     {
-      title: 'Ações',
-      key: 'actions',
+      title: "Ações",
+      key: "actions",
       render: (_: any, record: TeamData) => (
         <Button
           type="text"
@@ -186,13 +214,13 @@ const Organization: React.FC = () => {
               <Input
                 size="middle"
                 placeholder="Pesquisar"
-                prefix={<SearchOutlined style={{ color: '#FF426B' }} />}
+                prefix={<SearchOutlined style={{ color: "#FF426B" }} />}
                 style={{
                   height: 55,
                   borderRadius: 15,
-                  backgroundColor: '#192831',
-                  border: 'none',
-                  color: 'white',
+                  backgroundColor: "#192831",
+                  border: "none",
+                  color: "white",
                   marginRight: 15,
                 }}
               />
@@ -204,7 +232,11 @@ const Organization: React.FC = () => {
                 isDeletable={selectedOrganizationId !== null}
               />
               <div className="button-history">
-                <button type="submit" onClick={showModal} style={{ marginLeft: 15 }}>
+                <button
+                  type="submit"
+                  onClick={showModal}
+                  style={{ marginLeft: 15 }}
+                >
                   <p>Cadastrar</p>
                 </button>
               </div>
@@ -217,7 +249,7 @@ const Organization: React.FC = () => {
       </div>
 
       <Modal
-        title={isEditMode ? 'Editar Organização' : 'Cadastrar Organização'}
+        title={isEditMode ? "Editar Organização" : "Cadastrar Organização"}
         visible={isModalOpen}
         onCancel={handleCancel}
         width={800}
@@ -226,10 +258,14 @@ const Organization: React.FC = () => {
             Cancelar
           </Button>,
           <Button key="submit" type="primary" onClick={handleSubmit}>
-            {isEditMode ? 'Atualizar' : 'Salvar'}
+            {isEditMode ? "Atualizar" : "Salvar"}
           </Button>,
         ]}
-        bodyStyle={{ maxHeight: '70vh', overflowX: 'hidden', overflowY: 'auto' }}
+        bodyStyle={{
+          maxHeight: "70vh",
+          overflowX: "hidden",
+          overflowY: "auto",
+        }}
       >
         <Form form={form} layout="vertical">
           <Row gutter={16}>
@@ -237,7 +273,12 @@ const Organization: React.FC = () => {
               <Form.Item
                 label="Nome da Organização"
                 name="name"
-                rules={[{ required: true, message: 'Por favor, insira o nome da organização' }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor, insira o nome da organização",
+                  },
+                ]}
               >
                 <Input placeholder="Nome da Organização" />
               </Form.Item>
@@ -263,24 +304,24 @@ const Organization: React.FC = () => {
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item
-                  name={['address', 'street']}
+                  name={["address", "street"]}
                   label="Rua"
-                  rules={[{ required: true, message: 'Rua é obrigatória' }]}
+                  rules={[{ required: true, message: "Rua é obrigatória" }]}
                 >
                   <Input placeholder="Rua" />
                 </Form.Item>
               </Col>
               <Col span={8}>
                 <Form.Item
-                  name={['address', 'number']}
+                  name={["address", "number"]}
                   label="Número"
-                  rules={[{ required: true, message: 'Número é obrigatório' }]}
+                  rules={[{ required: true, message: "Número é obrigatório" }]}
                 >
                   <Input placeholder="Número" />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item name={['address', 'complement']} label="Complemento">
+                <Form.Item name={["address", "complement"]} label="Complemento">
                   <Input placeholder="Complemento" />
                 </Form.Item>
               </Col>
@@ -288,24 +329,24 @@ const Organization: React.FC = () => {
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item
-                  name={['address', 'city']}
+                  name={["address", "city"]}
                   label="Cidade"
-                  rules={[{ required: true, message: 'Cidade é obrigatória' }]}
+                  rules={[{ required: true, message: "Cidade é obrigatória" }]}
                 >
                   <Input placeholder="Cidade" />
                 </Form.Item>
               </Col>
               <Col span={8}>
                 <Form.Item
-                  name={['address', 'state']}
+                  name={["address", "state"]}
                   label="Estado"
-                  rules={[{ required: true, message: 'Estado é obrigatório' }]}
+                  rules={[{ required: true, message: "Estado é obrigatório" }]}
                 >
                   <Input placeholder="Estado" />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item name={['address', 'zipCode']} label="CEP">
+                <Form.Item name={["address", "zipCode"]} label="CEP">
                   <Input placeholder="CEP" />
                 </Form.Item>
               </Col>
@@ -314,12 +355,16 @@ const Organization: React.FC = () => {
 
           <div style={{ marginTop: 20 }}>
             <Space style={{ marginBottom: 16 }}>
-              <Button type="dashed" onClick={handleAddTeam} icon={<PlusOutlined />}>
+              <Button
+                type="dashed"
+                onClick={handleAddTeam}
+                icon={<PlusOutlined />}
+              >
                 Adicionar Time
               </Button>
             </Space>
             <Table
-              className='tables-wise'
+              className="tables-wise"
               columns={teamColumns}
               dataSource={teams}
               pagination={false}

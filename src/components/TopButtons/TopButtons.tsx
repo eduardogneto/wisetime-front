@@ -1,7 +1,12 @@
-import React from 'react';
-import './style.sass';
-import { Button, Popconfirm } from 'antd';
-import { DeleteOutlined, DownloadOutlined, EditOutlined, FileExcelOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  FileExcelOutlined,
+} from "@ant-design/icons";
+import { Button, Popconfirm } from "antd";
+import React from "react";
+import "./TopButtons.sass";
 
 export interface ITopButtons {
   handleNew?: (arg?: any) => void;
@@ -28,10 +33,10 @@ export const TopButtons: React.FC<ITopButtons> = ({
         <Button
           className="top-tool-buttons edit"
           onClick={handleEdit}
-          icon={<EditOutlined style={{ fontSize: 23, color: '#FFF' }} />}
+          icon={<EditOutlined style={{ fontSize: 23, color: "#FFF" }} />}
           disabled={!isEditable}
           title={"Editar"}
-          style={{ opacity: isEditable ? 1 : 0.5 }} 
+          style={{ opacity: isEditable ? 1 : 0.5 }}
         />
       )}
       {handleDelete && (
@@ -43,13 +48,16 @@ export const TopButtons: React.FC<ITopButtons> = ({
           disabled={!isDeletable}
           okText={"Deletar"}
           cancelText={"Cancelar"}
-          okButtonProps={{ danger: true, className: 'popconfirm-delete-button' }}
+          okButtonProps={{
+            danger: true,
+            className: "popconfirm-delete-button",
+          }}
         >
           <Button
             disabled={!isDeletable}
             className="top-tool-buttons trash"
-            icon={<DeleteOutlined style={{ fontSize: 23, color: '#FFF' }} />}
-            style={{ opacity: isDeletable ? 1 : 0.5 }} 
+            icon={<DeleteOutlined style={{ fontSize: 23, color: "#FFF" }} />}
+            style={{ opacity: isDeletable ? 1 : 0.5 }}
           />
         </Popconfirm>
       )}
@@ -57,14 +65,14 @@ export const TopButtons: React.FC<ITopButtons> = ({
         <Button
           type="text"
           onClick={exportGridData}
-          icon={<FileExcelOutlined style={{ fontSize: 23, color: '#FFF' }} />}
+          icon={<FileExcelOutlined style={{ fontSize: 23, color: "#FFF" }} />}
         />
       )}
       {handleNew && (
         <Button
           type="text"
           onClick={handleNew}
-          icon={<DownloadOutlined style={{ fontSize: 23, color: '#FFF' }} />}
+          icon={<DownloadOutlined style={{ fontSize: 23, color: "#FFF" }} />}
         />
       )}
     </div>

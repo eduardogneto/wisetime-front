@@ -1,164 +1,171 @@
-import React, { useState, useEffect } from 'react';
-import { ColumnsType } from 'antd/es/table';
-import { Table, Tag, Avatar } from 'antd';
-import api from '../../connection/api.js';
+import { Avatar, Table, Tag } from "antd";
+import { ColumnsType } from "antd/es/table";
+import React, { useEffect, useState } from "react";
+import api from "../../connection/api.js";
 
 interface DataType {
-    key: string;
-    user: string;
-    hours: string;
-    tags: string[];
-  }
-  
-  interface ReportsRankingTableProps {
-    teamId: number;
-  }
+  key: string;
+  user: string;
+  hours: string;
+  tags: string[];
+}
 
-  const ReportsRankingTable: React.FC = () => {
-    const [data, setData] = useState<DataType[]>([]);
-    const [loading, setLoading] = useState(false);
-  
-    const formatTime = (seconds: number) => {
-      const isNegative = seconds < 0;
-      const absoluteSeconds = Math.abs(seconds);
-  
-      const hours = Math.floor(absoluteSeconds / 3600);
-      const minutes = Math.floor((absoluteSeconds % 3600) / 60);
-  
-      const sign = isNegative ? '-' : '+';
-      const formattedHours = String(hours).padStart(2, '0');
-      const formattedMinutes = String(minutes).padStart(2, '0');
-  
-      return { sign, time: `${formattedHours}h${formattedMinutes}min` };
-    };
+interface ReportsRankingTableProps {
+  teamId: number;
+}
 
-    const teamString = localStorage.getItem('team');
-      if (teamString) {
-        try {
-            const team = JSON.parse(teamString);
-            var teamId = team.id;
-        } catch (error) {
-            console.error('Erro ao analisar o JSON:', error);
-        }
-      }
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        setLoading(true);
-        try {
-          const response = await api.get(`/api/reports/getUserBalances/${teamId}`);
-          const userBalances = response.data;
-  
-          const newData = userBalances.map((item: any, index: number) => {
-            const { userName, totalBalanceInSeconds } = item;
-  
-            const formattedTime = formatTime(totalBalanceInSeconds);
-  
-            const tags = [];
-            if (totalBalanceInSeconds > 0) {
-              tags.push('POSITIVAS');
-            } else if (totalBalanceInSeconds < 0) {
-              tags.push('NEGATIVAS');
-            } else {
-              tags.push('ZERO');
-            }
-  
-            return {
-              key: String(index),
-              user: userName,
-              hours: `${formattedTime.sign}${formattedTime.time}`,
-              tags: tags
-            };
-          });
-  
-          setData(newData);
-        } catch (error) {
-          console.error('Erro ao buscar dados:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchData();
-    }, [teamId]);
-  
-    const getInitials = (applicant: string) => {
-      if (typeof applicant === 'string') {
-        const nameParts = applicant.split(' ');
-        const initials = nameParts.map(part => part.charAt(0)).join('');
-        return initials.substring(0, 2).toUpperCase();
-      }
-      return 'NN';
-    };
-  
-    const columns: ColumnsType<DataType> = [
-      {
-        title: 'Usuário',
-        dataIndex: 'user',
-        key: 'user',
-        align: 'center',
-        render: (text: string) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar style={{ backgroundColor: '#fb003f3d', color: '#b30735', marginRight: 15 }}>
-              {getInitials(text)}
-            </Avatar>
-            {text}
-          </div>
-        ),
-      },
-      {
-        title: 'Horas',
-        dataIndex: 'hours',
-        key: 'hours',
-        align: 'center',
-        render: (text: string) => {
-          const isNegative = text.startsWith('-');
-          return (
-            <span style={{ color: isNegative ? 'red' : 'green' }}>{text}</span>
-          );
-        }
-      },
-      {
-        title: 'Tags',
-        key: 'tags',
-        dataIndex: 'tags',
-        align: 'center',
-        render: (_, { tags }) => (
-          <>
-            {tags.map(tag => {
-              let color;
-              if (tag === 'POSITIVAS') {
-                color = 'green';
-              } else if (tag === 'NEGATIVAS') {
-                color = 'red';
-              } else {
-                color = 'gray';
-                tag = 'ZERO';
-              }
-              return (
-                <Tag color={color} key={tag}>
-                  {tag.toUpperCase()}
-                </Tag>
-              );
-            })}
-          </>
-        ),
-      },
-    ];
-  
-    return (
-      <>
-        <Table
-          className="tables-wise"
-          style={{ maxHeight: 'calc(100% - 40%)' }}
-          pagination={false}
-          columns={columns}
-          loading={loading}
-          dataSource={data}
-        />
-      </>
-    );
+const ReportsRankingTable: React.FC = () => {
+  const [data, setData] = useState<DataType[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const formatTime = (seconds: number) => {
+    const isNegative = seconds < 0;
+    const absoluteSeconds = Math.abs(seconds);
+
+    const hours = Math.floor(absoluteSeconds / 3600);
+    const minutes = Math.floor((absoluteSeconds % 3600) / 60);
+
+    const sign = isNegative ? "-" : "+";
+    const formattedHours = String(hours).padStart(2, "0");
+    const formattedMinutes = String(minutes).padStart(2, "0");
+
+    return { sign, time: `${formattedHours}h${formattedMinutes}min` };
   };
-  
-  export default ReportsRankingTable;
-  
+
+  const teamString = localStorage.getItem("team");
+  if (teamString) {
+    try {
+      const team = JSON.parse(teamString);
+      var teamId = team.id;
+    } catch (error) {
+      console.error("Erro ao analisar o JSON:", error);
+    }
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get(
+          `/api/reports/getUserBalances/${teamId}`
+        );
+        const userBalances = response.data;
+
+        const newData = userBalances.map((item: any, index: number) => {
+          const { userName, totalBalanceInSeconds } = item;
+
+          const formattedTime = formatTime(totalBalanceInSeconds);
+
+          const tags: string[] = [];
+          if (totalBalanceInSeconds > 0) {
+            tags.push("POSITIVAS");
+          } else if (totalBalanceInSeconds < 0) {
+            tags.push("NEGATIVAS");
+          } else {
+            tags.push("ZERO");
+          }
+
+          return {
+            key: String(index),
+            user: userName,
+            hours: `${formattedTime.sign}${formattedTime.time}`,
+            tags: tags,
+          };
+        });
+
+        setData(newData);
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [teamId]);
+
+  const getInitials = (applicant: string) => {
+    if (typeof applicant === "string") {
+      const nameParts = applicant.split(" ");
+      const initials = nameParts.map((part) => part.charAt(0)).join("");
+      return initials.substring(0, 2).toUpperCase();
+    }
+    return "NN";
+  };
+
+  const columns: ColumnsType<DataType> = [
+    {
+      title: "Usuário",
+      dataIndex: "user",
+      key: "user",
+      align: "center",
+      render: (text: string) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            style={{
+              backgroundColor: "#fb003f3d",
+              color: "#b30735",
+              marginRight: 15,
+            }}
+          >
+            {getInitials(text)}
+          </Avatar>
+          {text}
+        </div>
+      ),
+    },
+    {
+      title: "Horas",
+      dataIndex: "hours",
+      key: "hours",
+      align: "center",
+      render: (text: string) => {
+        const isNegative = text.startsWith("-");
+        return (
+          <span style={{ color: isNegative ? "red" : "green" }}>{text}</span>
+        );
+      },
+    },
+    {
+      title: "Tags",
+      key: "tags",
+      dataIndex: "tags",
+      align: "center",
+      render: (_, { tags }) => (
+        <>
+          {tags.map((tag) => {
+            let color;
+            if (tag === "POSITIVAS") {
+              color = "green";
+            } else if (tag === "NEGATIVAS") {
+              color = "red";
+            } else {
+              color = "gray";
+              tag = "ZERO";
+            }
+            return (
+              <Tag color={color} key={tag}>
+                {tag.toUpperCase()}
+              </Tag>
+            );
+          })}
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <Table
+        className="tables-wise"
+        style={{ maxHeight: "calc(100% - 40%)" }}
+        pagination={false}
+        columns={columns}
+        loading={loading}
+        dataSource={data}
+      />
+    </>
+  );
+};
+
+export default ReportsRankingTable;
