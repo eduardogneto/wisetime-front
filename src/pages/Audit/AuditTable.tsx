@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './style.sass';
+import './Audit.sass';
 import { ColumnsType } from 'antd/es/table/InternalTable';
 import { Avatar, Table, Tag, message } from 'antd';
 import { TableRowSelection } from 'antd/es/table/interface';
