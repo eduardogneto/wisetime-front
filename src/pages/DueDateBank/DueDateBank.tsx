@@ -13,22 +13,6 @@ const DueDateBank: React.FC = () => {
       <div className="container-wise">
         <div className="table">
           <Breadcrumb />
-          <div className="filters-history" style={{ marginTop: 10 }}>
-            <div className="left-filters">
-              <Select
-                className="select"
-                placeholder="Selecione a Organização"
-                options={[
-                  { value: "1", label: "Empresa Teste 1" },
-                  { value: "2", label: "Empresa Teste 2" },
-                  { value: "3", label: "Empresa Teste 3" },
-                ]}
-              />
-            </div>
-            <div className="right-filters">
-              <TopButtons />
-            </div>
-          </div>
           <DueDateBankTable />
         </div>
       </div>
