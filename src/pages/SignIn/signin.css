@@ -1,12 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Krona+One&display=swap");
 
-html, body {
-  height: 100%; /* Para garantir que o body ocupe toda a altura da tela */
-  margin: 0;
-  display: flex;
-  justify-content: center; /* Centraliza horizontalmente */
-  align-items: center; /* Centraliza verticalmente */
-  background: linear-gradient(to right, #141c2d, #22070e) fixed; /* Manter o fundo */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to right, #141c2d, #22070e) fixed;
+    zoom: 0.96;
 }
 
 .container-login {
@@ -133,6 +135,22 @@ html, body {
     color: #FF426B;
 }
 
+@media (max-width: 1550px) {
+
+    html,
+    body {
+        zoom: 0.9;
+    }
+}
+
+@media (max-width: 1300px) {
+
+    html,
+    body {
+        zoom: 0.8;
+    }
+}
+
 @media (max-width: 1064px) {
 
     html,
@@ -147,13 +165,13 @@ html, body {
 }
 
 @media (max-width: 1024px) {
-
     .left-side {
         display: none;
     }
 
     .right-side {
-        width: 100vh;
+        min-width: 100vh;
+        width: 100%;
     }
 
     .login-box {

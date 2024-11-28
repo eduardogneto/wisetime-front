@@ -127,7 +127,7 @@ const UserTable: React.FC<UserTableProps> = ({
       setSelectedRowKeys(selectedKeys as number[]);
       onSelectUsers(selectedRows);
     },
-    type: "checkbox",
+    type: "checkbox" as "checkbox",
   };
 
   if (error) return <p>{error}</p>;

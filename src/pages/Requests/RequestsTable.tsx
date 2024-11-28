@@ -9,9 +9,9 @@ import {
   List,
   Button,
 } from 'antd';
-import EditDelete from '../../components/EditDelete/EditDelete.tsx';
 import api from '../../connection/api';
 import dayjs from 'dayjs';
+import EditDelete from '../../components/EditDelete/EditDelete';
 
 interface Punch {
   status: string;

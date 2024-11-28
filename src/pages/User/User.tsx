@@ -3,10 +3,10 @@ import "./User.sass";
 import { Input, Modal, Select, message, Button } from "antd";
 import React, { useState, useEffect } from "react";
 import { SearchOutlined } from "@ant-design/icons";
-import Breadcrumb from "../../components/Breadcrumb/breadcrumb.tsx";
-import UserTable from "./UserTable.tsx";
-import { TopButtons } from "../../components/TopButtons/TopButtons.tsx";
 import api from "../../connection/api";
+import { TopButtons } from "../../components/TopButtons/TopButtons";
+import Breadcrumb from "../../components/Breadcrumb/breadcrumb";
+import UserTable from "./UserTable";
 
 interface Team {
   id: number;
@@ -143,64 +143,66 @@ const User: React.FC = () => {
   return (
     <div>
       <Header />
-      <div className="container-wise">
-        <div className="table">
-          <Breadcrumb />
-          <div className="filters-history" style={{ marginTop: 10 }}>
-            <div className="left-filters">
-              <Input
-                size="middle"
-                placeholder="Pesquisar"
-                prefix={<SearchOutlined style={{ color: "#FF426B" }} />}
-                style={{
-                  height: 55,
-                  borderRadius: 15,
-                  backgroundColor: "#192831",
-                  border: "none",
-                  color: "white",
-                  marginRight: 15,
-                }}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="right-filters">
-              <TopButtons
-                handleEdit={showModal}
-                handleDelete={handleDelete}
-                isEditable={selectedUsers.length === 1}
-                isDeletable={selectedUsers.length > 0}
-              />
-              <div className="button-history">
-                <Button
-                  onClick={showModal}
-                  disabled={userTag !== "ADMINISTRADOR"}
+      <div className="wrapper-wise">
+        <div className="container-wise">
+          <div className="table">
+            <Breadcrumb />
+            <div className="filters-history" style={{ marginTop: 10 }}>
+              <div className="left-filters">
+                <Input
+                  size="middle"
+                  placeholder="Pesquisar"
+                  prefix={<SearchOutlined style={{ color: "#FF426B" }} />}
                   style={{
-                    marginLeft: 15,
-                    opacity: userTag === "ADMINISTRADOR" ? 1 : 0.5,
+                    height: 55,
+                    borderRadius: 15,
+                    backgroundColor: "#192831",
+                    border: "none",
+                    color: "white",
+                    marginRight: 15,
                   }}
-                >
-                  <p>Cadastrar</p>
-                </Button>
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="right-filters">
+                <TopButtons
+                  handleEdit={showModal}
+                  handleDelete={handleDelete}
+                  isEditable={selectedUsers.length === 1}
+                  isDeletable={selectedUsers.length > 0}
+                />
+                <div className="button-history">
+                  <Button
+                    onClick={showModal}
+                    disabled={userTag !== "ADMINISTRADOR"}
+                    style={{
+                      marginLeft: 15,
+                      opacity: userTag === "ADMINISTRADOR" ? 1 : 0.5,
+                    }}
+                  >
+                    <p>Cadastrar</p>
+                  </Button>
+                </div>
               </div>
             </div>
+            <UserTable
+              onSelectUsers={setSelectedUsers}
+              refresh={refresh}
+              searchTerm={searchTerm}
+            />
+            <Modal
+              className="modal"
+              title={
+                selectedUsers.length === 1
+                  ? "Editar usuário"
+                  : "Cadastrar novo usuário"
+              }
+              open={isModalOpen}
+              onOk={handleOk}
+              onCancel={handleCancel}
+            ></Modal>
           </div>
-          <UserTable
-            onSelectUsers={setSelectedUsers}
-            refresh={refresh}
-            searchTerm={searchTerm}
-          />
-          <Modal
-            className="modal"
-            title={
-              selectedUsers.length === 1
-                ? "Editar usuário"
-                : "Cadastrar novo usuário"
-            }
-            open={isModalOpen}
-            onOk={handleOk}
-            onCancel={handleCancel}
-          ></Modal>
         </div>
       </div>
     </div>

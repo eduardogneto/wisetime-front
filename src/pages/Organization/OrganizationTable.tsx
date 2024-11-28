@@ -1,7 +1,7 @@
 import {
-    DeleteOutlined,
-    PlusCircleOutlined,
-    PlusOutlined,
+  DeleteOutlined,
+  PlusCircleOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import { Button, Input, message, Modal, Space, Table } from "antd";
 import dayjs from "dayjs";
@@ -130,8 +130,8 @@ const OrganizationTable: React.FC<OrganizationTableProps> = ({
       message.success("Times salvos com sucesso!");
       fetchOrganizations();
       handleCancel();
-    } catch (error) {
-      if (error.response.data == "Erro ao atualizar times") {
+    } catch (error: any) {
+      if (error.response.data === "Erro ao atualizar times") {
         message.error(
           "Você não pode retirar um time que já está vinculado a um usuário."
         );

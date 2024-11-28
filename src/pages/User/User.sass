@@ -1,3 +1,6 @@
+.wrapper-wise
+  display: block
+
 .container-wise
   height: 800px
   background-color: #0C1317
@@ -5,7 +8,6 @@
   display: flex
   flex-direction: column
   margin-bottom: 50px
-  margin-top: 70px
   padding: 1rem
   min-width: 1200px
   max-width: 1200px
@@ -132,11 +134,28 @@ tr
   width: 300px
   height: 50px
 
+@media (max-width: 1885px)
+  .wrapper-wise
+    display: block
+    margin: 10rem 0 0 0
+
+@media (max-width: 1563px)
+  .wrapper-wise
+    display: block
+    margin: 18rem 0 0 0
+
+@media (max-width: 1400px)
+  .container-wise
+    max-width: 1000px
+    min-width: 1000px
+    width: 100%
+
 @media (max-width: 1064px)
   .container-wise
     max-width: none
-    min-width: 200px
+    min-width: 1000px
     width: 100%
+    margin-top: 70px
 
 @media (max-width: 690px)
   .balance-point p

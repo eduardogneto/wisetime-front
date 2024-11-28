@@ -1,14 +1,13 @@
-import { Select, Spin, message, Skeleton } from "antd";
+import { message, Select, Skeleton } from "antd";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import React, { useEffect, useState } from "react";
-import Breadcrumb from "../../components/Breadcrumb/breadcrumb.tsx";
+import Breadcrumb from "../../components/Breadcrumb/breadcrumb";
 import Header from "../../components/Header";
-import { TopButtons } from "../../components/TopButtons/TopButtons.tsx";
+import { TopButtons } from "../../components/TopButtons/TopButtons";
 import api from "../../connection/api";
-import HistoryPointTable from "./HistoryPointTable.tsx";
-import { LoadingOutlined } from "@ant-design/icons";
 import "./HistoryPoint.sass";
+import HistoryPointTable from "./HistoryPointTable";
 
 dayjs.extend(isBetween);
 
@@ -136,101 +135,106 @@ const HistoryPoint: React.FC = () => {
   return (
     <div className="history-point-container">
       <Header />
-      <div className="container-wise">
-        <div className="table">
-          <Breadcrumb />
-          {loading ? (
-            <div className="skeleton-wrapper">
-              <Skeleton active paragraph={{ rows: 4 }} title />
-              <Skeleton.Button
-                active
-                size="large"
-                block
-                style={{ marginTop: 20 }}
-              />
-              <Skeleton active paragraph={{ rows: 10 }} title />
-            </div>
-          ) : (
-            <>
-              <div className="containers-balance">
-                <div className="balance-point">
-                  <p className="top-point-balace">Saldo Anterior</p>
-                  <p className="low-point-balace">
-                    {(() => {
-                      const { symbol, formattedTime } = formatBalance(
-                        balances.previousPeriodBalance
-                      );
-                      return (
-                        <>
-                          <span className="pink">{symbol}</span>
-                          <span>{formattedTime}</span>
-                        </>
-                      );
-                    })()}
-                  </p>
-                </div>
-                <div className="balance-point">
-                  <p className="top-point-balace">Saldo Período</p>
-                  <p className="low-point-balace">
-                    {(() => {
-                      const { symbol, formattedTime } = formatBalance(
-                        balances.currentPeriodBalance
-                      );
-                      return (
-                        <>
-                          <span className="pink">{symbol}</span>
-                          <span>{formattedTime}</span>
-                        </>
-                      );
-                    })()}
-                  </p>
-                </div>
-                <div className="balance-point">
-                  <p className="top-point-balace">Saldo Geral</p>
-                  <p className="low-point-balace">
-                    {(() => {
-                      const { symbol, formattedTime } = formatBalance(
-                        balances.totalBalance
-                      );
-                      return (
-                        <>
-                          <span className="pink">{symbol}</span>
-                          <span>{formattedTime}</span>
-                        </>
-                      );
-                    })()}
-                  </p>
-                </div>
+      <div className="wrapper-wise">
+        <div className="container-wise">
+          <div className="table">
+            <Breadcrumb />
+            {loading ? (
+              <div className="skeleton-wrapper">
+                <Skeleton active paragraph={{ rows: 4 }} title />
+                <Skeleton.Button
+                  active
+                  size="large"
+                  block
+                  style={{ marginTop: 20 }}
+                />
+                <Skeleton active paragraph={{ rows: 10 }} title />
               </div>
-              <p style={{ marginLeft: 10 }}>Período</p>
-              <div className="filters-history">
-                <div className="left-filters">
-                  <Select
-                    onChange={handleChange}
-                    className="select"
-                    placeholder="Selecione o Período"
-                    value={defaultValue}
-                    style={{ width: 250 }}
-                    loading={periods.length === 0}
-                  >
-                    {periods.map((period) => (
-                      <Option key={period.id} value={period.id.toString()}>
-                        {`${dayjs(period.startDate).format(
-                          "DD/MM/YYYY"
-                        )} - ${dayjs(period.endDate).format(
-                          "DD/MM/YYYY"
-                        )}${getPeriodStatus(period.startDate, period.endDate)}`}
-                      </Option>
-                    ))}
-                  </Select>
+            ) : (
+              <>
+                <div className="containers-balance">
+                  <div className="balance-point">
+                    <p className="top-point-balace">Saldo Anterior</p>
+                    <p className="low-point-balace">
+                      {(() => {
+                        const { symbol, formattedTime } = formatBalance(
+                          balances.previousPeriodBalance
+                        );
+                        return (
+                          <>
+                            <span className="pink">{symbol}</span>
+                            <span>{formattedTime}</span>
+                          </>
+                        );
+                      })()}
+                    </p>
+                  </div>
+                  <div className="balance-point">
+                    <p className="top-point-balace">Saldo Período</p>
+                    <p className="low-point-balace">
+                      {(() => {
+                        const { symbol, formattedTime } = formatBalance(
+                          balances.currentPeriodBalance
+                        );
+                        return (
+                          <>
+                            <span className="pink">{symbol}</span>
+                            <span>{formattedTime}</span>
+                          </>
+                        );
+                      })()}
+                    </p>
+                  </div>
+                  <div className="balance-point">
+                    <p className="top-point-balace">Saldo Geral</p>
+                    <p className="low-point-balace">
+                      {(() => {
+                        const { symbol, formattedTime } = formatBalance(
+                          balances.totalBalance
+                        );
+                        return (
+                          <>
+                            <span className="pink">{symbol}</span>
+                            <span>{formattedTime}</span>
+                          </>
+                        );
+                      })()}
+                    </p>
+                  </div>
                 </div>
-                <div className="right-filters">
-                  <TopButtons />
+                <p style={{ marginLeft: 10 }}>Período</p>
+                <div className="filters-history">
+                  <div className="left-filters">
+                    <Select
+                      onChange={handleChange}
+                      className="select"
+                      placeholder="Selecione o Período"
+                      value={defaultValue}
+                      style={{ width: 250 }}
+                      loading={periods.length === 0}
+                    >
+                      {periods.map((period) => (
+                        <Option key={period.id} value={period.id.toString()}>
+                          {`${dayjs(period.startDate).format(
+                            "DD/MM/YYYY"
+                          )} - ${dayjs(period.endDate).format(
+                            "DD/MM/YYYY"
+                          )}${getPeriodStatus(
+                            period.startDate,
+                            period.endDate
+                          )}`}
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div className="right-filters">
+                    <TopButtons />
+                  </div>
                 </div>
-              </div>
-              <HistoryPointTable selectedPeriod={selectedPeriod} />
-            </>
-          )}
+                <HistoryPointTable selectedPeriod={selectedPeriod} />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

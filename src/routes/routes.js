@@ -59,6 +59,14 @@ const ApplicationRoutes = () => {
     return (
         <BrowserRouter>
             <Routes>
+                <Route
+                    path="/"
+                    element={
+                        loading ? null : (
+                            signed ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+                        )
+                    }
+                />
                 <Route path='/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                 <Route path='/historypoint' element={<PrivateRoute noAdmin={true}><HistoryPoint /></PrivateRoute>} />
                 <Route path='/management/users' element={<PrivateRoute requiresAdminOrCoordinator={true}><User /></PrivateRoute>} />

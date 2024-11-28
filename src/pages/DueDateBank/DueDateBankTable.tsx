@@ -52,7 +52,7 @@ const DueDateBankTable: React.FC = () => {
         }));
 
         transformedData.sort(
-          (a, b) => moment(b.startDate).unix() - moment(a.startDate).unix()
+          (a: { startDate: moment.MomentInput; }, b: { startDate: moment.MomentInput; }) => moment(b.startDate).unix() - moment(a.startDate).unix()
         );
 
         setData(transformedData);

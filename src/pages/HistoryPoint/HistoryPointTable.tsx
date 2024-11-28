@@ -16,8 +16,8 @@ import { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
 import React, { useEffect, useState } from "react";
-import EditDelete from "../../components/EditDelete/EditDelete.tsx";
 import api from "../../connection/api";
+import EditDelete from "../../components/EditDelete/EditDelete";
 dayjs.locale("pt-br");
 
 interface DataType {
@@ -125,7 +125,7 @@ const HistoryPointTable: React.FC<HistoryPointTableProps> = ({
 
       const combinedData = allDates.map((date) => {
         const dateObj = dayjs(date, "DD/MM/YYYY");
-        const punchForDate = punchData.find((p) =>
+        const punchForDate = punchData.find((p: { key: string | number | Date | dayjs.Dayjs | null | undefined; }) =>
           dayjs(p.key).isSame(dateObj, "day")
         );
 

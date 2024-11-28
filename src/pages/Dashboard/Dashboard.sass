@@ -4,9 +4,8 @@
   display: flex
   flex-direction: column
   width: 70%
-  margin: 5rem 4rem 0rem 4rem
   justify-self: center
-  gap: 3rem
+  gap: 1rem
   padding: 0 0 0 5rem
 
 .container-point
@@ -15,6 +14,8 @@
   display: flex
   flex-direction: column
   padding-bottom: 1rem
+  margin-top: 50px
+  min-width: 1000px
 
 p
   font-family: 'Krona One', sans-serif
@@ -25,6 +26,7 @@ p
   display: flex
   overflow: auto
   padding-bottom: 1rem
+  min-width: 1000px
 
 .hello-user
   display: flex
@@ -157,17 +159,18 @@ p
   margin: 0 10px
   color: #ffffff
 
-@media (max-width: 1314px)
-  .button-point button h1
-    font-size: 20px !important
+@media (max-width: 1563px)
+  .container-point
+    margin-top: 120px
 
 @media (max-width: 1024px)
   .wrapper-conteiner
     width: 100%
     margin: 1rem
     justify-self: center
-    padding: 4.5rem 0rem 1rem 2.2rem
-    gap: 3
+    margin: 5.5rem 3.3rem 0 0
+    gap: 1rem
+    min-width: none
 
   .container-point
     background-color: #0C1317

@@ -1,10 +1,10 @@
 import { Select, SelectProps, Skeleton, Tooltip, message } from "antd";
 import React, { useEffect, useState } from "react";
-import Breadcrumb from "../../components/Breadcrumb/breadcrumb.tsx";
 import Header from "../../components/Header/index.js";
 import api from "../../connection/api";
 import "./Requests.sass";
-import RequestsTable from "./RequestsTable.tsx";
+import Breadcrumb from "../../components/Breadcrumb/breadcrumb";
+import RequestsTable from "./RequestsTable";
 
 interface ItemProps {
   label: string;
@@ -16,8 +16,6 @@ const options: SelectProps["options"] = [
     label: "Tipos",
     options: [
       { label: "Edição", value: "1" },
-      { label: "Deletar", value: "2" },
-      { label: "Abono", value: "3" },
       { label: "Atestado", value: "4" },
     ],
   },
@@ -92,93 +90,95 @@ const Requests: React.FC = () => {
   return (
     <div className="requests-page">
       <Header />
-      <div className="container-wise">
-        <div className="table">
-          <Breadcrumb />
-          <div className="containers-balance">
+      <div className="wrapper-wise">
+        <div className="container-wise">
+          <div className="table">
+            <Breadcrumb />
+            <div className="containers-balance">
+              {loading ? (
+                <>
+                  <div className="balance-point">
+                    <Skeleton
+                      active
+                      title={false}
+                      paragraph={{ rows: 1, width: "60%" }}
+                    />
+                  </div>
+                  <div className="balance-point">
+                    <Skeleton
+                      active
+                      title={false}
+                      paragraph={{ rows: 1, width: "60%" }}
+                    />
+                  </div>
+                  <div className="balance-point">
+                    <Skeleton
+                      active
+                      title={false}
+                      paragraph={{ rows: 1, width: "60%" }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="balance-point">
+                    <p className="top-point-balace">Solicitações em aberto</p>
+                    <p className="low-point-balace">
+                      <span>{counts.pendente}</span>
+                    </p>
+                  </div>
+                  <div className="balance-point">
+                    <p className="top-point-balace">Solicitações aprovadas</p>
+                    <p className="low-point-balace">
+                      <span>{counts.aprovado}</span>
+                    </p>
+                  </div>
+                  <div className="balance-point">
+                    <p className="top-point-balace">Solicitações reprovadas</p>
+                    <p className="low-point-balace">
+                      <span>{counts.reprovado}</span>
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+            <p style={{ marginLeft: 10 }}>Filtros</p>
+            <div className="filters-history">
+              <div className="left-filters">
+                <Select
+                  {...sharedProps}
+                  {...selectProps}
+                  className="select-props"
+                  maxTagPlaceholder={(omittedValues) => (
+                    <Tooltip
+                      overlayStyle={{ pointerEvents: "none" }}
+                      title={omittedValues
+                        .map((value) => {
+                          const option = options
+                            .flatMap((group) => group.options)
+                            .find((opt) => opt.value === value);
+                          return option?.label || value;
+                        })
+                        .join(", ")}
+                    >
+                      <span>{`+${omittedValues.length} Filtros`}</span>
+                    </Tooltip>
+                  )}
+                />
+              </div>
+            </div>
+
             {loading ? (
-              <>
-                <div className="balance-point">
-                  <Skeleton
-                    active
-                    title={false}
-                    paragraph={{ rows: 1, width: "60%" }}
-                  />
-                </div>
-                <div className="balance-point">
-                  <Skeleton
-                    active
-                    title={false}
-                    paragraph={{ rows: 1, width: "60%" }}
-                  />
-                </div>
-                <div className="balance-point">
-                  <Skeleton
-                    active
-                    title={false}
-                    paragraph={{ rows: 1, width: "60%" }}
-                  />
-                </div>
-              </>
+              <div className="skeleton-table">
+                <Skeleton active paragraph={{ rows: 5 }} />
+              </div>
             ) : (
-              <>
-                <div className="balance-point">
-                  <p className="top-point-balace">Solicitações em aberto</p>
-                  <p className="low-point-balace">
-                    <span>{counts.pendente}</span>
-                  </p>
-                </div>
-                <div className="balance-point">
-                  <p className="top-point-balace">Solicitações aprovadas</p>
-                  <p className="low-point-balace">
-                    <span>{counts.aprovado}</span>
-                  </p>
-                </div>
-                <div className="balance-point">
-                  <p className="top-point-balace">Solicitações reprovadas</p>
-                  <p className="low-point-balace">
-                    <span>{counts.reprovado}</span>
-                  </p>
-                </div>
-              </>
+              <RequestsTable
+                filters={value}
+                onActionCompleted={fetchRequestCounts}
+              />
             )}
           </div>
-          <p style={{ marginLeft: 10 }}>Filtros</p>
-          <div className="filters-history">
-            <div className="left-filters">
-              <Select
-                {...sharedProps}
-                {...selectProps}
-                className="select-props"
-                maxTagPlaceholder={(omittedValues) => (
-                  <Tooltip
-                    overlayStyle={{ pointerEvents: "none" }}
-                    title={omittedValues
-                      .map((value) => {
-                        const option = options
-                          .flatMap((group) => group.options)
-                          .find((opt) => opt.value === value);
-                        return option?.label || value;
-                      })
-                      .join(", ")}
-                  >
-                    <span>{`+${omittedValues.length} Filtros`}</span>
-                  </Tooltip>
-                )}
-              />
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="skeleton-table">
-              <Skeleton active paragraph={{ rows: 5 }} />
-            </div>
-          ) : (
-            <RequestsTable
-              filters={value}
-              onActionCompleted={fetchRequestCounts}
-            />
-          )}
         </div>
       </div>
     </div>

@@ -1,10 +1,10 @@
 import { Skeleton, message } from "antd";
 import React, { useEffect, useState } from "react";
-import Breadcrumb from "../../components/Breadcrumb/breadcrumb.tsx";
 import Header from "../../components/Header/index.js";
 import api from "../../connection/api.js";
 import "./Reports.sass";
-import ReportsRankingTable from "./ReportsRankingTable.tsx";
+import Breadcrumb from "../../components/Breadcrumb/breadcrumb";
+import ReportsRankingTable from "./ReportsRankingTable";
 
 const Reports: React.FC = () => {
   const [positiveHours, setPositiveHours] = useState<number>(0);
@@ -83,55 +83,59 @@ const Reports: React.FC = () => {
   return (
     <div className="reports-page">
       <Header />
-      <div className="container-wise">
-        <div className="table">
-          <Breadcrumb />
-          <div className="containers-balance">
+      <div className="wrapper-wise">
+        <div className="container-wise">
+          <div className="table">
+            <Breadcrumb />
+            <div className="containers-balance">
+              {loading ? (
+                <>
+                  <div className="balance-point">
+                    <Skeleton.Input active />
+                  </div>
+                  <div className="balance-point">
+                    <Skeleton.Input active />
+                  </div>
+                  <div className="balance-point">
+                    <Skeleton.Input active />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="balance-point">
+                    <p className="top-point-balace">
+                      Usuários com horas extras
+                    </p>
+                    <p className="low-point-balace">
+                      <span>{positiveHours}</span>
+                    </p>
+                  </div>
+                  <div className="balance-point">
+                    <p className="top-point-balace">
+                      Usuários com horas negativas
+                    </p>
+                    <p className="low-point-balace">
+                      <span>{negativeHours}</span>
+                    </p>
+                  </div>
+                  <div className="balance-point">
+                    <p className="top-point-balace">Total de horas do time</p>
+                    <p className="low-point-balace">
+                      <span>
+                        <span className="pink">{formattedTotalHours.sign}</span>
+                        {formattedTotalHours.time}
+                      </span>
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
             {loading ? (
-              <>
-                <div className="balance-point">
-                  <Skeleton.Input active />
-                </div>
-                <div className="balance-point">
-                  <Skeleton.Input active />
-                </div>
-                <div className="balance-point">
-                  <Skeleton.Input active />
-                </div>
-              </>
+              <Skeleton active paragraph={{ rows: 10 }} />
             ) : (
-              <>
-                <div className="balance-point">
-                  <p className="top-point-balace">Usuários com horas extras</p>
-                  <p className="low-point-balace">
-                    <span>{positiveHours}</span>
-                  </p>
-                </div>
-                <div className="balance-point">
-                  <p className="top-point-balace">
-                    Usuários com horas negativas
-                  </p>
-                  <p className="low-point-balace">
-                    <span>{negativeHours}</span>
-                  </p>
-                </div>
-                <div className="balance-point">
-                  <p className="top-point-balace">Total de horas do time</p>
-                  <p className="low-point-balace">
-                    <span>
-                      <span className="pink">{formattedTotalHours.sign}</span>
-                      {formattedTotalHours.time}
-                    </span>
-                  </p>
-                </div>
-              </>
+              <ReportsRankingTable />
             )}
           </div>
-          {loading ? (
-            <Skeleton active paragraph={{ rows: 10 }} />
-          ) : (
-            <ReportsRankingTable />
-          )}
         </div>
       </div>
     </div>
