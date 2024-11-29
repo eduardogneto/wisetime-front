@@ -27,7 +27,7 @@ const User: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refresh, setRefresh] = useState(0);
   const organizationId = localStorage.getItem("organizationId");
-  const userTag = localStorage.getItem("userTag");
+  const userTag = localStorage.getItem("tag");
 
   useEffect(() => {
     const fetchTeams = async () => {
@@ -50,6 +50,7 @@ const User: React.FC = () => {
   }, [organizationId]);
 
   const showModal = () => {
+    console.log(userTag);
     if (selectedUsers.length === 1) {
       const selectedUser = selectedUsers[0];
       setName(selectedUser.name);
@@ -175,10 +176,10 @@ const User: React.FC = () => {
                 <div className="button-history">
                   <Button
                     onClick={showModal}
-                    disabled={userTag === "ADMINISTRADOR"}
+                    disabled={userTag != "ADMINISTRADOR"}
                     style={{
                       marginLeft: 15,
-                      opacity: userTag != "ADMINISTRADOR" ? 1 : 0.5,
+                      opacity: userTag === "ADMINISTRADOR" ? 1 : 0.5,
                     }}
                   >
                     <p>Cadastrar</p>
