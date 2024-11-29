@@ -175,10 +175,10 @@ const User: React.FC = () => {
                 <div className="button-history">
                   <Button
                     onClick={showModal}
-                    disabled={userTag !== "ADMINISTRADOR"}
+                    disabled={userTag === "ADMINISTRADOR"}
                     style={{
                       marginLeft: 15,
-                      opacity: userTag === "ADMINISTRADOR" ? 1 : 0.5,
+                      opacity: userTag != "ADMINISTRADOR" ? 1 : 0.5,
                     }}
                   >
                     <p>Cadastrar</p>
@@ -201,7 +201,49 @@ const User: React.FC = () => {
               open={isModalOpen}
               onOk={handleOk}
               onCancel={handleCancel}
-            ></Modal>
+            >
+            <div className='input-modal'>
+              <h4>Nome</h4>
+              <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className='input-modal'>
+              <h4>Email</h4>
+              <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className='input-modal'>
+              <h4>Senha</h4>
+              <Input
+                placeholder={selectedUsers ? "Deixe em branco para manter a senha atual" : "Senha"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password" 
+              />
+            </div>
+            <div className='input-modal'>
+              <h4>Time</h4>
+              <Select
+                style={{ width: '100%' }}
+                placeholder="Selecione o time"
+                loading={loadingTeams}
+                value={teamId}
+                onChange={(value) => setTeamId(value)}
+                options={teams.map(team => ({ value: team.id, label: team.name }))}
+              />
+            </div>
+            <div className='input-modal'>
+              <h4>Tag</h4>
+              <Select
+                style={{ width: '100%' }}
+                placeholder="Selecione a tag"
+                value={tag}
+                onChange={(value) => setTag(value)}
+                options={[
+                  { value: 'ADMINISTRADOR', label: 'Administrador' },
+                  { value: 'COORDENADOR', label: 'Coordenador' },
+                  { value: 'FUNCIONARIO', label: 'Funcionário' },
+                ]}
+              />
+            </div></Modal>
           </div>
         </div>
       </div>
