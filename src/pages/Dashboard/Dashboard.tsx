@@ -103,8 +103,10 @@ const Dashboard: React.FC = () => {
   const fetchPunchLogs = async () => {
     try {
       setLoadingPunchLogs(true);
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString("en-CA");
       const response = await api.get(
-        `/api/punch/history/${userId}/${new Date().toISOString().split("T")[0]}`
+        `/api/punch/history/${userId}/${formattedDate}`
       );
       if (response.status === 200) {
         const sortedLogs = response.data.sort((a: any, b: any) => {
