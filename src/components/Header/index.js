@@ -35,11 +35,11 @@ export default function Header() {
       label: 'Painel de Gestor',
       icon: <DesktopOutlined />,
       children: [
-        {
+        ...(perm === 'ADMINISTRADOR' ? [{
           key: '3',
           label: 'Usuários',
           path: '/management/users'
-        },
+        }] : []), 
         {
           key: '4',
           label: 'Vencimento de Banco',

@@ -69,7 +69,7 @@ const ApplicationRoutes = () => {
                 />
                 <Route path='/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                 <Route path='/historypoint' element={<PrivateRoute noAdmin={true}><HistoryPoint /></PrivateRoute>} />
-                <Route path='/management/users' element={<PrivateRoute requiresAdminOrCoordinator={true}><User /></PrivateRoute>} />
+                <Route path='/management/users' element={<PrivateRoute requiresAdmin={true}><User /></PrivateRoute>} />
                 <Route path='/management/duedatebank' element={<PrivateRoute requiresAdminOrCoordinator={true}><DueDateBank /></PrivateRoute>} />
                 <Route path='/management/requests' element={<PrivateRoute noAdmin={true} requiresAdminOrCoordinator={true}><Requests /></PrivateRoute>} />
                 <Route path='/management/organization' element={<PrivateRoute requiresAdmin={true}><Organization /></PrivateRoute>} />

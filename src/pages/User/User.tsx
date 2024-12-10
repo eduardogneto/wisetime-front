@@ -170,8 +170,8 @@ const User: React.FC = () => {
                 <TopButtons
                   handleEdit={showModal}
                   handleDelete={handleDelete}
-                  isEditable={selectedUsers.length === 1}
-                  isDeletable={selectedUsers.length > 0}
+                  isEditable={selectedUsers.length === 1 && userTag == "ADMINISTRADOR"}
+                  isDeletable={selectedUsers.length > 0 && userTag == "ADMINISTRADOR"}
                 />
                 <div className="button-history">
                   <Button
